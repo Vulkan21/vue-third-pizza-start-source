@@ -2,7 +2,12 @@
   <header class="header">
     <div class="header__logo">
       <a href="index.html" class="logo">
-        <img src="@/assets/img/logo.svg" alt="V!U!E! Pizza logo" width="90" height="40">
+        <img
+          src="@/assets/img/logo.svg"
+          alt="V!U!E! Pizza logo"
+          width="90"
+          height="40"
+        />
       </a>
     </div>
     <div class="header__cart">
@@ -16,8 +21,8 @@
 
 <script>
 export default {
-  name: 'AppHeader'
-}
+  name: "AppHeader",
+};
 </script>
 
 <style lang="scss" scoped>
@@ -25,11 +30,14 @@ export default {
 $white: #ffffff;
 $black: #000000;
 
-$green-400: #48D618;
-$green-500: #41B619;
-$green-600: #38A413;
+$green-400: #48d618;
+$green-500: #41b619;
+$green-600: #38a413;
 
-$shadow-light: 0 4px 8px rgba($black, 0.04), 0 0 2px rgba($black, 0.06), 0 0 1px rgba($black, 0.04);
+$shadow-light:
+  0 4px 8px rgba($black, 0.04),
+  0 0 2px rgba($black, 0.06),
+  0 0 1px rgba($black, 0.04);
 
 @mixin b-s16-h19 {
   font-size: 16px;
@@ -160,7 +168,7 @@ $shadow-light: 0 4px 8px rgba($black, 0.04), 0 0 2px rgba($black, 0.06), 0 0 1px
     height: 32px;
     margin-right: 8px;
 
-    content: '';
+    content: "";
     vertical-align: middle;
 
     background: url(@/assets/img/login.svg) no-repeat center;
@@ -176,7 +184,7 @@ $shadow-light: 0 4px 8px rgba($black, 0.04), 0 0 2px rgba($black, 0.06), 0 0 1px
     height: 32px;
     margin-left: 8px;
 
-    content: '';
+    content: "";
     vertical-align: middle;
 
     background: url(@/assets/img/login.svg) no-repeat center;

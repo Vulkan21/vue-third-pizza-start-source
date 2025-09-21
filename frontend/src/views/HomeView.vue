@@ -1,35 +1,31 @@
 <template>
   <main class="content">
     <form action="#" method="post">
-
       <div class="content__wrapper">
         <h1 class="title title--big">Конструктор пиццы</h1>
 
         <div class="content__dough">
-
           <div class="sheet">
             <h2 class="title title--small sheet__title">Выберите тесто</h2>
 
             <div class="sheet__content dough">
-              <label 
-                v-for="(doughType, index) in dough" 
+              <label
+                v-for="(doughType, index) in dough"
                 :key="doughType.id"
                 :class="`dough__input dough__input--${doughType.id === 1 ? 'light' : 'large'}`"
               >
-                <input 
-                  type="radio" 
-                  name="dought" 
-                  :value="doughType.id" 
+                <input
+                  type="radio"
+                  name="dought"
+                  :value="doughType.id"
                   class="visually-hidden"
                   :checked="index === 0"
-                >
+                />
                 <b>{{ doughType.name }}</b>
                 <span>{{ doughType.description }}</span>
               </label>
             </div>
-
           </div>
-
         </div>
 
         <div class="content__diameter">
@@ -37,18 +33,18 @@
             <h2 class="title title--small sheet__title">Выберите размер</h2>
 
             <div class="sheet__content diameter">
-              <label 
-                v-for="(size, index) in sizes" 
+              <label
+                v-for="(size, index) in sizes"
                 :key="size.id"
                 :class="`diameter__input diameter__input--${index === 0 ? 'small' : index === 1 ? 'normal' : 'big'}`"
               >
-                <input 
-                  type="radio" 
-                  name="diameter" 
-                  :value="size.id" 
+                <input
+                  type="radio"
+                  name="diameter"
+                  :value="size.id"
                   class="visually-hidden"
                   :checked="index === 1"
-                >
+                />
                 <span>{{ size.name }}</span>
               </label>
             </div>
@@ -57,24 +53,25 @@
 
         <div class="content__ingredients">
           <div class="sheet">
-            <h2 class="title title--small sheet__title">Выберите ингредиенты</h2>
+            <h2 class="title title--small sheet__title">
+              Выберите ингредиенты
+            </h2>
 
             <div class="sheet__content ingredients">
-
               <div class="ingredients__sauce">
                 <p>Основной соус:</p>
 
-                <label 
-                  v-for="(sauce, index) in sauces" 
-                  :key="sauce.id" 
+                <label
+                  v-for="(sauce, index) in sauces"
+                  :key="sauce.id"
                   class="radio ingredients__input"
                 >
-                  <input 
-                    type="radio" 
-                    name="sauce" 
+                  <input
+                    type="radio"
+                    name="sauce"
                     :value="sauce.id"
                     :checked="index === 0"
-                  >
+                  />
                   <span>{{ sauce.name }}</span>
                 </label>
               </div>
@@ -83,27 +80,40 @@
                 <p>Начинка:</p>
 
                 <ul class="ingredients__list">
-                  <li 
-                    v-for="ingredient in ingredients" 
-                    :key="ingredient.id" 
+                  <li
+                    v-for="ingredient in ingredients"
+                    :key="ingredient.id"
                     class="ingredients__item"
                   >
-                    <span :class="`filling filling--${getIngredientClass(ingredient.name)}`">{{ ingredient.name }}</span>
+                    <span
+                      :class="`filling filling--${getIngredientClass(ingredient.name)}`"
+                      >{{ ingredient.name }}</span
+                    >
 
                     <div class="counter counter--orange ingredients__counter">
-                      <button type="button" class="counter__button counter__button--minus" disabled>
+                      <button
+                        type="button"
+                        class="counter__button counter__button--minus"
+                        disabled
+                      >
                         <span class="visually-hidden">Меньше</span>
                       </button>
-                      <input type="text" name="counter" class="counter__input" value="0">
-                      <button type="button" class="counter__button counter__button--plus">
+                      <input
+                        type="text"
+                        name="counter"
+                        class="counter__input"
+                        value="0"
+                      />
+                      <button
+                        type="button"
+                        class="counter__button counter__button--plus"
+                      >
                         <span class="visually-hidden">Больше</span>
                       </button>
                     </div>
                   </li>
                 </ul>
-
               </div>
-
             </div>
           </div>
         </div>
@@ -111,7 +121,11 @@
         <div class="content__pizza">
           <label class="input">
             <span class="visually-hidden">Название пиццы</span>
-            <input type="text" name="pizza_name" placeholder="Введите название пиццы">
+            <input
+              type="text"
+              name="pizza_name"
+              placeholder="Введите название пиццы"
+            />
           </label>
 
           <div class="content__constructor">
@@ -129,53 +143,51 @@
             <button type="button" class="button" disabled>Готовьте!</button>
           </div>
         </div>
-
       </div>
-
     </form>
   </main>
 </template>
 
 <script>
-import doughData from '@/mocks/dough.json'
-import sizesData from '@/mocks/sizes.json'
-import ingredientsData from '@/mocks/ingredients.json'
-import saucesData from '@/mocks/sauces.json'
+import doughData from "@/mocks/dough.json";
+import sizesData from "@/mocks/sizes.json";
+import ingredientsData from "@/mocks/ingredients.json";
+import saucesData from "@/mocks/sauces.json";
 
 export default {
-  name: 'HomeView',
+  name: "HomeView",
   data() {
     return {
       dough: doughData,
       sizes: sizesData,
       ingredients: ingredientsData,
-      sauces: saucesData
-    }
+      sauces: saucesData,
+    };
   },
   methods: {
     getIngredientClass(ingredientName) {
       // Сопоставляем названия ингредиентов с их CSS классами
       const classMap = {
-        'Грибы': 'mushrooms',
-        'Чеддер': 'cheddar',
-        'Салями': 'salami',
-        'Ветчина': 'ham',
-        'Ананас': 'ananas',
-        'Бекон': 'bacon',
-        'Лук': 'onion',
-        'Чили': 'chile',
-        'Халапеньо': 'jalapeno',
-        'Маслины': 'olives',
-        'Томаты': 'tomatoes',
-        'Лосось': 'salmon',
-        'Моцарелла': 'mozzarella',
-        'Пармезан': 'parmesan',
-        'Блю чиз': 'blue_cheese'
-      }
-      return classMap[ingredientName] || 'default'
-    }
-  }
-}
+        Грибы: "mushrooms",
+        Чеддер: "cheddar",
+        Салями: "salami",
+        Ветчина: "ham",
+        Ананас: "ananas",
+        Бекон: "bacon",
+        Лук: "onion",
+        Чили: "chile",
+        Халапеньо: "jalapeno",
+        Маслины: "olives",
+        Томаты: "tomatoes",
+        Лосось: "salmon",
+        Моцарелла: "mozzarella",
+        Пармезан: "parmesan",
+        "Блю чиз": "blue_cheese",
+      };
+      return classMap[ingredientName] || "default";
+    },
+  },
+};
 </script>
 
 <style lang="scss" scoped>
@@ -183,34 +195,40 @@ export default {
 $white: #ffffff;
 $black: #000000;
 
-$orange-100: #FF842B;
-$orange-200: #FF6B00;
-$orange-300: #ED6300;
+$orange-100: #ff842b;
+$orange-200: #ff6b00;
+$orange-300: #ed6300;
 
-$green-100: #E1FFD7;
-$green-200: #C2E3B7;
-$green-300: #8CB97C;
-$green-400: #48D618;
-$green-500: #41B619;
-$green-600: #38A413;
+$green-100: #e1ffd7;
+$green-200: #c2e3b7;
+$green-300: #8cb97c;
+$green-400: #48d618;
+$green-500: #41b619;
+$green-600: #38a413;
 
-$red-800: #E20338;
-$red-900: #C20532;
+$red-800: #e20338;
+$red-900: #c20532;
 
-$silver-100: #F7F4F4;
-$silver-200: #EAEAEA;
-$silver-300: #D7D7D7;
+$silver-100: #f7f4f4;
+$silver-200: #eaeaea;
+$silver-300: #d7d7d7;
 
-$purple-100: #F2EEF5;
-$purple-200: #F6EBFF;
-$purple-300: #EBDCF7;
-$purple-400: #B3ABBC;
+$purple-100: #f2eef5;
+$purple-200: #f6ebff;
+$purple-300: #ebdcf7;
+$purple-400: #b3abbc;
 $purple-800: #685879;
 
 // Design System Shadows
-$shadow-light: 0 4px 8px rgba($black, 0.04), 0 0 2px rgba($black, 0.06), 0 0 1px rgba($black, 0.04);
+$shadow-light:
+  0 4px 8px rgba($black, 0.04),
+  0 0 2px rgba($black, 0.06),
+  0 0 1px rgba($black, 0.04);
 $shadow-regular: 0 0 0 2px rgba($green-500, 0.6);
-$shadow-medium: 0 16px 24px rgba($black, 0.06), 0 2px 6px rgba($black, 0.04), 0 0 1px rgba($black, 0.04);
+$shadow-medium:
+  0 16px 24px rgba($black, 0.06),
+  0 2px 6px rgba($black, 0.04),
+  0 0 1px rgba($black, 0.04);
 $shadow-big: 0 0 2px 2px rgba($black, 0.5);
 $shadow-large: 0 0 0 2px $green-500;
 
@@ -664,7 +682,6 @@ $shadow-large: 0 0 0 2px $green-500;
     background-repeat: no-repeat;
     background-position: center;
     background-size: 80% 80%;
-
   }
 
   &--tomatoes::before {
@@ -1016,7 +1033,7 @@ $shadow-large: 0 0 0 2px $green-500;
     width: 100%;
     height: 100%;
 
-    content: '';
+    content: "";
 
     background-image: inherit;
   }

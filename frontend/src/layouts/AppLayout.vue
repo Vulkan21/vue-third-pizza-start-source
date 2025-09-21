@@ -1,17 +1,17 @@
 <template>
   <div>
     <AppHeader />
-    <slot />
+    <RouterView />
   </div>
 </template>
 
 <script>
-import AppHeader from './AppHeader.vue'
+import AppHeader from "./AppHeader.vue";
 
 export default {
-  name: 'AppLayout',
+  name: "AppLayout",
   components: {
-    AppHeader
-  }
-}
+    AppHeader,
+  },
+};
 </script>

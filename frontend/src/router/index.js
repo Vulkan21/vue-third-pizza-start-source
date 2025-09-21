@@ -1,8 +1,22 @@
 import { createRouter, createWebHistory } from "vue-router";
+import AppLayout from "@/layouts/AppLayout.vue";
+import HomeView from "@/views/HomeView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [],
+  routes: [
+    {
+      path: "/",
+      component: AppLayout,
+      children: [
+        {
+          path: "",
+          name: "home",
+          component: HomeView,
+        },
+      ],
+    },
+  ],
 });
 
 export default router;

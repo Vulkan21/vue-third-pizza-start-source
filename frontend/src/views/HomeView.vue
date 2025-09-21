@@ -427,7 +427,7 @@ $shadow-large: 0 0 0 2px $green-500;
   &--light {
     b {
       &::before {
-        background-image: url("../img/dough-light.svg");
+        background-image: url("@/assets/img/dough-light.svg");
       }
     }
   }
@@ -435,7 +435,7 @@ $shadow-large: 0 0 0 2px $green-500;
   &--large {
     b {
       &::before {
-        background-image: url("../img/dough-large.svg");
+        background-image: url("@/assets/img/dough-large.svg");
       }
     }
   }
@@ -480,7 +480,7 @@ $shadow-large: 0 0 0 2px $green-500;
 
       border-radius: 50%;
       background-color: $green-100;
-      background-image: url("../img/diameter.svg");
+      background-image: url("@/assets/img/diameter.svg");
       background-repeat: no-repeat;
       background-position: center;
     }
@@ -668,63 +668,63 @@ $shadow-large: 0 0 0 2px $green-500;
   }
 
   &--tomatoes::before {
-    background-image: url("../img/filling/tomatoes.svg");
+    background-image: url("@/assets/img/filling/tomatoes.svg");
   }
 
   &--ananas::before {
-    background-image: url("../img/filling/ananas.svg");
+    background-image: url("@/assets/img/filling/ananas.svg");
   }
 
   &--bacon::before {
-    background-image: url("../img/filling/bacon.svg");
+    background-image: url("@/assets/img/filling/bacon.svg");
   }
 
   &--blue_cheese::before {
-    background-image: url("../img/filling/blue_cheese.svg");
+    background-image: url("@/assets/img/filling/blue_cheese.svg");
   }
 
   &--cheddar::before {
-    background-image: url("../img/filling/cheddar.svg");
+    background-image: url("@/assets/img/filling/cheddar.svg");
   }
 
   &--chile::before {
-    background-image: url("../img/filling/chile.svg");
+    background-image: url("@/assets/img/filling/chile.svg");
   }
 
   &--ham::before {
-    background-image: url("../img/filling/ham.svg");
+    background-image: url("@/assets/img/filling/ham.svg");
   }
 
   &--jalapeno::before {
-    background-image: url("../img/filling/jalapeno.svg");
+    background-image: url("@/assets/img/filling/jalapeno.svg");
   }
 
   &--mozzarella::before {
-    background-image: url("../img/filling/mozzarella.svg");
+    background-image: url("@/assets/img/filling/mozzarella.svg");
   }
 
   &--mushrooms::before {
-    background-image: url("../img/filling/mushrooms.svg");
+    background-image: url("@/assets/img/filling/mushrooms.svg");
   }
 
   &--olives::before {
-    background-image: url("../img/filling/olives.svg");
+    background-image: url("@/assets/img/filling/olives.svg");
   }
 
   &--onion::before {
-    background-image: url("../img/filling/onion.svg");
+    background-image: url("@/assets/img/filling/onion.svg");
   }
 
   &--parmesan::before {
-    background-image: url("../img/filling/parmesan.svg");
+    background-image: url("@/assets/img/filling/parmesan.svg");
   }
 
   &--salami::before {
-    background-image: url("../img/filling/salami.svg");
+    background-image: url("@/assets/img/filling/salami.svg");
   }
 
   &--salmon::before {
-    background-image: url("../img/filling/salmon.svg");
+    background-image: url("@/assets/img/filling/salmon.svg");
   }
 }
 
@@ -970,19 +970,19 @@ $shadow-large: 0 0 0 2px $green-500;
   background-size: 100%;
 
   &--foundation--big-creamy {
-    background-image: url("../img/foundation/big-creamy.svg");
+    background-image: url("@/assets/img/foundation/big-creamy.svg");
   }
 
   &--foundation--big-tomato {
-    background-image: url("../img/foundation/big-tomato.svg");
+    background-image: url("@/assets/img/foundation/big-tomato.svg");
   }
 
   &--foundation--small-creamy {
-    background-image: url("../img/foundation/small-creamy.svg");
+    background-image: url("@/assets/img/foundation/small-creamy.svg");
   }
 
   &--foundation--small-tomato {
-    background-image: url("../img/foundation/small-tomato.svg");
+    background-image: url("@/assets/img/foundation/small-tomato.svg");
   }
 }
 
@@ -1046,91 +1046,91 @@ $shadow-large: 0 0 0 2px $green-500;
   &--ananas,
   &--ananas.pizza__filling--second::before,
   &--ananas.pizza__filling--third::after {
-    background-image: url("../img/filling-big/ananas.svg");
+    background-image: url("@/assets/img/filling-big/ananas.svg");
   }
 
   &--bacon,
   &--bacon.pizza__filling--second::before,
   &--bacon.pizza__filling--third::after {
-    background-image: url("../img/filling-big/bacon.svg");
+    background-image: url("@/assets/img/filling-big/bacon.svg");
   }
 
   &--blue_cheese,
   &--blue.pizza__filling--second::before,
   &--blue.pizza__filling--third::after {
-    background-image: url("../img/filling-big/blue_cheese.svg");
+    background-image: url("@/assets/img/filling-big/blue_cheese.svg");
   }
 
   &--cheddar,
   &--cheddar.pizza__filling--second::before,
   &--cheddar.pizza__filling--third::after {
-    background-image: url("../img/filling-big/cheddar.svg");
+    background-image: url("@/assets/img/filling-big/cheddar.svg");
   }
 
   &--chile,
   &--chile.pizza__filling--second::before,
   &--chile.pizza__filling--third::after {
-    background-image: url("../img/filling-big/chile.svg");
+    background-image: url("@/assets/img/filling-big/chile.svg");
   }
 
   &--ham,
   &--ham.pizza__filling--second::before,
   &--ham.pizza__filling--third::after {
-    background-image: url("../img/filling-big/ham.svg");
+    background-image: url("@/assets/img/filling-big/ham.svg");
   }
 
   &--jalapeno,
   &--jalapeno.pizza__filling--second::before,
   &--jalapeno.pizza__filling--third::after {
-    background-image: url("../img/filling-big/jalapeno.svg");
+    background-image: url("@/assets/img/filling-big/jalapeno.svg");
   }
 
   &--mozzarella,
   &--mozzarella.pizza__filling--second::before,
   &--mozzarella.pizza__filling--third::after {
-    background-image: url("../img/filling-big/mozzarella.svg");
+    background-image: url("@/assets/img/filling-big/mozzarella.svg");
   }
 
   &--mushrooms,
   &--mushrooms.pizza__filling--second::before,
   &--mushrooms.pizza__filling--third::after {
-    background-image: url("../img/filling-big/mushrooms.svg");
+    background-image: url("@/assets/img/filling-big/mushrooms.svg");
   }
 
   &--olives,
   &--olives.pizza__filling--second::before,
   &--olives.pizza__filling--third::after {
-    background-image: url("../img/filling-big/olives.svg");
+    background-image: url("@/assets/img/filling-big/olives.svg");
   }
 
   &--onion,
   &--onion.pizza__filling--second::before,
   &--onion.pizza__filling--third::after {
-    background-image: url("../img/filling-big/onion.svg");
+    background-image: url("@/assets/img/filling-big/onion.svg");
   }
 
   &--parmesan,
   &--parmesan.pizza__filling--second::before,
   &--parmesan.pizza__filling--third::after {
-    background-image: url("../img/filling-big/parmesan.svg");
+    background-image: url("@/assets/img/filling-big/parmesan.svg");
   }
 
   &--salami,
   &--salami.pizza__filling--second::before,
   &--salami.pizza__filling--third::after {
-    background-image: url("../img/filling-big/salami.svg");
+    background-image: url("@/assets/img/filling-big/salami.svg");
   }
 
   &--salmon,
   &--salmon.pizza__filling--second::before,
   &--salmon.pizza__filling--third::after {
-    background-image: url("../img/filling-big/salmon.svg");
+    background-image: url("@/assets/img/filling-big/salmon.svg");
   }
 
   &--tomatoes,
   &--tomatoes.pizza__filling--second::before,
   &--tomatoes.pizza__filling--third::after {
-    background-image: url("../img/filling-big/tomatoes.svg");
+    background-image: url("@/assets/img/filling-big/tomatoes.svg");
   }
 }
 

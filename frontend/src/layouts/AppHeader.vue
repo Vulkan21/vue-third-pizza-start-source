@@ -2,7 +2,7 @@
   <header class="header">
     <div class="header__logo">
       <a href="index.html" class="logo">
-        <img src="img/logo.svg" alt="V!U!E! Pizza logo" width="90" height="40">
+        <img src="@/assets/img/logo.svg" alt="V!U!E! Pizza logo" width="90" height="40">
       </a>
     </div>
     <div class="header__cart">
@@ -81,7 +81,7 @@ $shadow-light: 0 4px 8px rgba($black, 0.04), 0 0 2px rgba($black, 0.06), 0 0 1px
 
     color: $white;
     background-color: $green-500;
-    background-image: url("../img/cart.svg");
+    background-image: url("@/assets/img/cart.svg");
     background-repeat: no-repeat;
     background-position: 20px center;
     background-size: 29px 27px;
@@ -163,7 +163,7 @@ $shadow-light: 0 4px 8px rgba($black, 0.04), 0 0 2px rgba($black, 0.06), 0 0 1px
     content: '';
     vertical-align: middle;
 
-    background: url(../img/login.svg) no-repeat center;
+    background: url(@/assets/img/login.svg) no-repeat center;
     background-size: auto 50%;
   }
 }
@@ -179,7 +179,7 @@ $shadow-light: 0 4px 8px rgba($black, 0.04), 0 0 2px rgba($black, 0.06), 0 0 1px
     content: '';
     vertical-align: middle;
 
-    background: url(../img/login.svg) no-repeat center;
+    background: url(@/assets/img/login.svg) no-repeat center;
     background-size: auto 50%;
   }
 }

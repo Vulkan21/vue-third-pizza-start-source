@@ -1,0 +1,458 @@
+// Common reusable components styles
+@use "ds-system/ds-colors";
+@use "ds-system/ds-shadows";
+@use "ds-system/ds-typography";
+@use "mixins/m_center";
+
+// Title component styles
+.title {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  color: ds-colors.$black;
+
+  &--big {
+    @include ds-typography.b-s36-h42;
+  }
+
+  &--small {
+    @include ds-typography.b-s18-h21;
+  }
+}
+
+// Sheet component styles
+.sheet {
+  padding-top: 15px;
+  border-radius: 8px;
+  background-color: ds-colors.$white;
+  box-shadow: ds-shadows.$shadow-light;
+}
+
+.sheet__title {
+  padding-right: 18px;
+  padding-left: 18px;
+}
+
+.sheet__content {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  margin-top: 8px;
+  padding-top: 18px;
+  padding-right: 18px;
+  padding-left: 18px;
+
+  border-top: 1px solid rgba(ds-colors.$green-500, 0.1);
+}
+
+// Button component styles
+.button {
+  $bl: &;
+
+  @include ds-typography.b-s18-h21;
+  font-family: inherit;
+  display: block;
+
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+
+  cursor: pointer;
+  transition: 0.3s;
+  text-align: center;
+
+  color: ds-colors.$white;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  box-shadow: ds-shadows.$shadow-medium;
+
+  background-color: ds-colors.$green-500;
+
+  &:hover:not(:active):not(:disabled) {
+    background-color: ds-colors.$green-400;
+  }
+
+  &:active:not(:disabled) {
+    background-color: ds-colors.$green-600;
+  }
+
+  &:focus:not(:disabled) {
+    opacity: 0.5;
+  }
+
+  &:disabled {
+    background-color: ds-colors.$green-300;
+    color: rgba(ds-colors.$white, 0.2);
+    cursor: default;
+  }
+
+  &--border {
+    background-color: transparent;
+    border: 1px solid ds-colors.$green-500;
+    color: ds-colors.$black;
+    box-shadow: none;
+
+    &:hover:not(:active):not(:disabled) {
+      color: ds-colors.$green-500;
+      border-color: ds-colors.$green-500;
+      background-color: transparent;
+    }
+
+    &:active:not(:disabled) {
+      color: ds-colors.$green-600;
+      border-color: ds-colors.$green-600;
+      background-color: transparent;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+    }
+  }
+
+  &--transparent {
+    @include ds-typography.b-s14-h16;
+    background-color: transparent;
+    box-shadow: none;
+    color: ds-colors.$black;
+
+    &:hover:not(:active):not(:disabled) {
+      color: ds-colors.$red-800;
+      background-color: transparent;
+    }
+
+    &:active:not(:disabled) {
+      color: ds-colors.$red-900;
+      background-color: transparent;
+    }
+
+    &:disabled {
+      opacity: 0.25;
+    }
+  }
+
+  &--arrow {
+    &::before {
+      content: "";
+      background-image: url("../img/button-arrow.svg");
+      background-position: center;
+      background-repeat: no-repeat;
+      margin-right: 16px;
+      width: 18px;
+      height: 18px;
+      display: inline-block;
+      vertical-align: middle;
+      transform: translateY(-1px);
+    }
+  }
+
+  &--white {
+    background-color: ds-colors.$white;
+    color: ds-colors.$green-500;
+  }
+}
+
+// Input component styles
+.input {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+
+  span {
+    @include ds-typography.r-s14-h16;
+    display: block;
+    margin-bottom: 8px;
+    color: ds-colors.$black;
+  }
+
+  input,
+  textarea {
+    @include ds-typography.r-s16-h19;
+    
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 16px;
+    
+    font-family: inherit;
+    color: ds-colors.$black;
+    border: 1px solid rgba(ds-colors.$purple-400, 0.5);
+    border-radius: 8px;
+    outline: none;
+    background-color: ds-colors.$white;
+    
+    &::placeholder {
+      color: ds-colors.$purple-400;
+    }
+    
+    &:focus {
+      border-color: ds-colors.$green-500;
+    }
+  }
+
+  &--big-label {
+    span {
+      @include ds-typography.r-s16-h19;
+      margin-bottom: 12px;
+    }
+  }
+}
+
+// Select component styles
+.select {
+  @include ds-typography.r-s16-h19;
+  
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 16px;
+  
+  font-family: inherit;
+  color: ds-colors.$black;
+  border: 1px solid rgba(ds-colors.$purple-400, 0.5);
+  border-radius: 8px;
+  outline: none;
+  background-color: ds-colors.$white;
+  
+  &:focus {
+    border-color: ds-colors.$green-500;
+  }
+}
+
+// Radio component styles
+.radio {
+  position: relative;
+  cursor: pointer;
+  display: block;
+  padding-left: 28px;
+  
+  @include ds-typography.r-s16-h19;
+  color: ds-colors.$black;
+
+  input[type="radio"] {
+    position: absolute;
+    left: -9999px;
+  }
+
+  &::before {
+    @include m_center.p_center-all;
+    
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    
+    display: block;
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    
+    content: "";
+    
+    border: 1px solid ds-colors.$purple-400;
+    border-radius: 50%;
+    background-color: ds-colors.$white;
+  }
+
+  &:hover::before {
+    border-color: ds-colors.$purple-800;
+  }
+
+  input:checked + &::before,
+  input:checked ~ &::before {
+    border: 6px solid ds-colors.$green-500;
+  }
+}
+
+// Product component styles
+.product {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.product__img {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.product__text {
+  flex: 1;
+  
+  h2 {
+    @include ds-typography.b-s16-h19;
+    margin: 0 0 8px 0;
+    color: ds-colors.$black;
+  }
+
+  ul {
+    @include ds-typography.r-s14-h16;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: ds-colors.$purple-800;
+
+    li {
+      margin-bottom: 4px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  p {
+    @include ds-typography.r-s14-h16;
+    margin: 0;
+    color: ds-colors.$purple-800;
+  }
+}
+
+// Counter component styles
+.counter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.counter__button {
+  $el: &;
+  $size_icon: 50%;
+
+  position: relative;
+
+  display: block;
+
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+
+  cursor: pointer;
+  transition: 0.3s;
+
+  border: none;
+  border-radius: 50%;
+  outline: none;
+
+  &--minus {
+    background-color: ds-colors.$purple-100;
+
+    &::before {
+      @include m_center.p_center-all;
+
+      width: $size_icon;
+      height: 2px;
+
+      content: "";
+
+      border-radius: 2px;
+      background-color: ds-colors.$black;
+    }
+
+    &:hover:not(:active):not(:disabled) {
+      background-color: ds-colors.$purple-200;
+    }
+
+    &:active:not(:disabled) {
+      background-color: ds-colors.$purple-300;
+    }
+
+    &:focus:not(:disabled) {
+      box-shadow: ds-shadows.$shadow-regular;
+    }
+
+    &:disabled {
+      cursor: default;
+
+      &::before {
+        opacity: 0.1;
+      }
+    }
+  }
+
+  &--plus {
+    background-color: ds-colors.$green-500;
+
+    &::before {
+      @include m_center.p_center-all;
+
+      width: $size_icon;
+      height: 2px;
+
+      content: "";
+
+      border-radius: 2px;
+      background-color: ds-colors.$white;
+    }
+
+    &::after {
+      @include m_center.p_center-all;
+
+      width: $size_icon;
+      height: 2px;
+
+      content: "";
+      transform: translate(-50%, -50%) rotate(90deg);
+
+      border-radius: 2px;
+      background-color: ds-colors.$white;
+    }
+
+    &:hover:not(:active):not(:disabled) {
+      background-color: ds-colors.$green-400;
+    }
+
+    &:active:not(:disabled) {
+      background-color: ds-colors.$green-600;
+    }
+
+    &:focus:not(:disabled) {
+      box-shadow: ds-shadows.$shadow-regular;
+    }
+
+    &:disabled {
+      cursor: default;
+
+      opacity: 0.3;
+    }
+  }
+
+  &--orange {
+    background-color: ds-colors.$orange-200;
+
+    &:hover:not(:active):not(:disabled) {
+      background-color: ds-colors.$orange-100;
+    }
+
+    &:active:not(:disabled) {
+      background-color: ds-colors.$orange-300;
+    }
+  }
+}
+
+.counter__input {
+  @include ds-typography.r-s14-h16;
+
+  box-sizing: border-box;
+  width: 22px;
+  margin: 0;
+  padding: 0 3px;
+
+  text-align: center;
+
+  color: ds-colors.$black;
+  border: none;
+  border-radius: 10px;
+  outline: none;
+  background-color: transparent;
+
+  &:focus {
+    box-shadow: inset ds-shadows.$shadow-regular;
+  }
+}

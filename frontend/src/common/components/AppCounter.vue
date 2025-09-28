@@ -1,343 +1,186 @@
 <template>
-  <div :class="['app-counter', `app-counter--${variant}`]">
-    <button
-      type="button"
-      class="app-counter__button app-counter__button--minus"
-      :disabled="disabled || value <= min"
+  <div class="counter">
+    <button 
+      type="button" 
+      class="counter__button counter__button--minus"
+      :disabled="isMinusDisabled"
       @click="decrement"
     >
-      <span class="visually-hidden">Меньше</span>
+      <span class="visually-hidden">{{ minusLabel || 'Меньше' }}</span>
     </button>
-
-    <input
-      type="text"
+    
+    <input 
+      type="text" 
       :name="name"
-      class="app-counter__input"
+      class="counter__input" 
       :value="displayValue"
-      :disabled="disabled"
+      :readonly="readonly"
       @input="handleInput"
       @blur="handleBlur"
     />
-
-    <button
-      type="button"
-      class="app-counter__button app-counter__button--plus"
-      :disabled="disabled || value >= max"
+    
+    <button 
+      type="button" 
+      class="counter__button counter__button--plus"
+      :class="{ 'counter__button--orange': orangeStyle }"
+      :disabled="isPlusDisabled"
       @click="increment"
     >
-      <span class="visually-hidden">Больше</span>
+      <span class="visually-hidden">{{ plusLabel || 'Больше' }}</span>
     </button>
   </div>
 </template>
 
 <script>
+import { computed, ref, watch } from 'vue'
+
 export default {
-  name: "AppCounter",
+  name: 'AppCounter',
   props: {
-    /**
-     * Текущее значение
-     */
-    value: {
+    // Основное значение счетчика
+    modelValue: {
       type: Number,
-      default: 0,
+      default: 0
     },
-    /**
-     * Минимальное значение
-     */
+    
+    // Минимальное значение
     min: {
       type: Number,
-      default: 0,
+      default: 0
     },
-    /**
-     * Максимальное значение
-     */
+    
+    // Максимальное значение
     max: {
       type: Number,
-      default: 100,
+      default: Infinity
     },
-    /**
-     * Шаг изменения
-     */
+    
+    // Шаг изменения значения
     step: {
       type: Number,
-      default: 1,
+      default: 1
     },
-    /**
-     * Имя для поля ввода
-     */
+    
+    // Имя поля для формы
     name: {
       type: String,
-      default: "counter",
+      default: 'counter'
     },
-    /**
-     * Вариант стиля
-     */
-    variant: {
-      type: String,
-      default: "default",
-      validator: (value) => ["default", "orange"].includes(value),
-    },
-    /**
-     * Отключить счетчик
-     */
-    disabled: {
+    
+    // Доступно ли редактирование поля ввода
+    readonly: {
       type: Boolean,
-      default: false,
+      default: false
     },
+    
+    // Использовать ли оранжевый стиль для кнопки плюс
+    orangeStyle: {
+      type: Boolean,
+      default: false
+    },
+    
+    // Кастомные лейблы для accessibility
+    minusLabel: {
+      type: String,
+      default: ''
+    },
+    
+    plusLabel: {
+      type: String,
+      default: ''
+    }
   },
-  emits: ["update:value", "change"],
-  data() {
+  
+  emits: ['update:modelValue', 'change'],
+  
+  setup(props, { emit }) {
+    const internalValue = ref(props.modelValue)
+    
+    // Отслеживаем изменения внешнего значения
+    watch(() => props.modelValue, (newValue) => {
+      internalValue.value = newValue
+    })
+    
+    // Вычисляемые свойства для состояния кнопок
+    const isMinusDisabled = computed(() => {
+      return internalValue.value <= props.min
+    })
+    
+    const isPlusDisabled = computed(() => {
+      return internalValue.value >= props.max
+    })
+    
+    // Отображаемое значение (с валидацией)
+    const displayValue = computed(() => {
+      return Math.max(props.min, Math.min(props.max, internalValue.value))
+    })
+    
+    // Функция для валидации и нормализации значения
+    const normalizeValue = (value) => {
+      const numValue = typeof value === 'number' ? value : parseInt(value, 10)
+      
+      if (isNaN(numValue)) {
+        return internalValue.value
+      }
+      
+      return Math.max(props.min, Math.min(props.max, numValue))
+    }
+    
+    // Обновление значения
+    const updateValue = (newValue) => {
+      const normalizedValue = normalizeValue(newValue)
+      
+      if (normalizedValue !== internalValue.value) {
+        internalValue.value = normalizedValue
+        emit('update:modelValue', normalizedValue)
+        emit('change', normalizedValue)
+      }
+    }
+    
+    // Увеличение значения
+    const increment = () => {
+      if (!isPlusDisabled.value) {
+        updateValue(internalValue.value + props.step)
+      }
+    }
+    
+    // Уменьшение значения
+    const decrement = () => {
+      if (!isMinusDisabled.value) {
+        updateValue(internalValue.value - props.step)
+      }
+    }
+    
+    // Обработка ввода в поле
+    const handleInput = (event) => {
+      if (!props.readonly) {
+        const value = event.target.value
+        updateValue(value)
+      }
+    }
+    
+    // Обработка потери фокуса (дополнительная валидация)
+    const handleBlur = (event) => {
+      if (!props.readonly) {
+        // Обновляем отображаемое значение до нормализованного
+        event.target.value = displayValue.value
+      }
+    }
+    
     return {
-      inputValue: this.value.toString(),
-    };
-  },
-  computed: {
-    displayValue() {
-      return this.inputValue;
-    },
-  },
-  watch: {
-    value(newValue) {
-      this.inputValue = newValue.toString();
-    },
-  },
-  methods: {
-    increment() {
-      const newValue = Math.min(this.value + this.step, this.max);
-      this.updateValue(newValue);
-    },
-
-    decrement() {
-      const newValue = Math.max(this.value - this.step, this.min);
-      this.updateValue(newValue);
-    },
-
-    handleInput(event) {
-      this.inputValue = event.target.value;
-    },
-
-    handleBlur() {
-      const numericValue = parseInt(this.inputValue, 10);
-
-      if (isNaN(numericValue)) {
-        // Возвращаем к предыдущему значению
-        this.inputValue = this.value.toString();
-        return;
-      }
-
-      const clampedValue = Math.max(this.min, Math.min(this.max, numericValue));
-      this.updateValue(clampedValue);
-    },
-
-    updateValue(newValue) {
-      if (newValue !== this.value) {
-        this.$emit("update:value", newValue);
-        this.$emit("change", newValue);
-      }
-    },
-  },
-};
+      displayValue,
+      isMinusDisabled,
+      isPlusDisabled,
+      increment,
+      decrement,
+      handleInput,
+      handleBlur
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
-// Design System Colors
-$white: #ffffff;
-$black: #000000;
-
-$orange-100: #ff842b;
-$orange-200: #ff6b00;
-$orange-300: #ed6300;
-
-$green-400: #48d618;
-$green-500: #41b619;
-$green-600: #38a413;
-
-$purple-100: #f2eef5;
-$purple-200: #f6ebff;
-$purple-300: #ebdcf7;
-
-// Design System Shadows
-$shadow-regular: 0 0 0 2px rgba($green-500, 0.6);
-
-// Typography Mixins
-@mixin r-s14-h16 {
-  font-size: 14px;
-  font-weight: 400;
-  font-style: normal;
-  line-height: 16px;
-}
-
-// Center Mixins
-@mixin p_center-all {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.app-counter {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 54px;
-
-  &--orange {
-    .app-counter__button--plus {
-      background-color: $orange-200;
-
-      &:hover:not(:active):not(:disabled) {
-        background-color: $orange-100;
-      }
-
-      &:active:not(:disabled) {
-        background-color: $orange-300;
-      }
-    }
-  }
-}
-
-.app-counter__button {
-  $size_icon: 50%;
-
-  position: relative;
-  display: block;
-
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  padding: 0;
-
-  cursor: pointer;
-  transition: 0.3s;
-
-  border: none;
-  border-radius: 50%;
-  outline: none;
-
-  &--minus {
-    background-color: $purple-100;
-
-    &::before {
-      @include p_center-all;
-
-      width: $size_icon;
-      height: 2px;
-
-      content: "";
-
-      border-radius: 2px;
-      background-color: $black;
-    }
-
-    &:hover:not(:active):not(:disabled) {
-      background-color: $purple-200;
-    }
-
-    &:active:not(:disabled) {
-      background-color: $purple-300;
-    }
-
-    &:focus:not(:disabled) {
-      box-shadow: $shadow-regular;
-    }
-
-    &:disabled {
-      cursor: default;
-
-      &::before {
-        opacity: 0.1;
-      }
-    }
-  }
-
-  &--plus {
-    background-color: $green-500;
-
-    &::before {
-      @include p_center-all;
-
-      width: $size_icon;
-      height: 2px;
-
-      content: "";
-
-      border-radius: 2px;
-      background-color: $white;
-    }
-
-    &::after {
-      @include p_center-all;
-
-      width: $size_icon;
-      height: 2px;
-
-      content: "";
-      transform: translate(-50%, -50%) rotate(90deg);
-
-      border-radius: 2px;
-      background-color: $white;
-    }
-
-    &:hover:not(:active):not(:disabled) {
-      background-color: $green-400;
-    }
-
-    &:active:not(:disabled) {
-      background-color: $green-600;
-    }
-
-    &:focus:not(:disabled) {
-      box-shadow: $shadow-regular;
-    }
-
-    &:disabled {
-      cursor: default;
-      opacity: 0.3;
-    }
-  }
-}
-
-.app-counter__input {
-  @include r-s14-h16;
-
-  box-sizing: border-box;
-  width: 22px;
-  margin: 0;
-  padding: 0 3px;
-
-  text-align: center;
-
-  color: $black;
-  border: none;
-  border-radius: 10px;
-  outline: none;
-  background-color: transparent;
-
-  &:focus {
-    box-shadow: inset $shadow-regular;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-  }
-}
-
-// Visually hidden
-.visually-hidden {
-  position: absolute;
-
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-
-  white-space: nowrap;
-
-  border: 0;
-
-  clip-path: inset(100%);
-}
+// Стили теперь подключены глобально через common-components.scss
+// Никаких дополнительных стилей здесь не требуется
 </style>

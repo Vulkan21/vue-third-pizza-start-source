@@ -12,11 +12,15 @@
   color: ds-colors.$black;
 
   &--big {
-    @include ds-typography.b-s36-h42;
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 42px;
   }
 
   &--small {
-    @include ds-typography.b-s18-h21;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 21px;
   }
 }
 
@@ -50,7 +54,9 @@
 .button {
   $bl: &;
 
-  @include ds-typography.b-s18-h21;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 21px;
   font-family: inherit;
   display: block;
 
@@ -112,7 +118,9 @@
   }
 
   &--transparent {
-    @include ds-typography.b-s14-h16;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 16px;
     background-color: transparent;
     box-shadow: none;
     color: ds-colors.$black;
@@ -160,7 +168,9 @@
   width: 100%;
 
   span {
-    @include ds-typography.r-s14-h16;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
     display: block;
     margin-bottom: 8px;
     color: ds-colors.$black;
@@ -168,7 +178,9 @@
 
   input,
   textarea {
-    @include ds-typography.r-s16-h19;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 19px;
     
     display: block;
     box-sizing: border-box;
@@ -194,7 +206,9 @@
 
   &--big-label {
     span {
-      @include ds-typography.r-s16-h19;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 19px;
       margin-bottom: 12px;
     }
   }
@@ -202,7 +216,9 @@
 
 // Select component styles
 .select {
-  @include ds-typography.r-s16-h19;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 19px;
   
   box-sizing: border-box;
   width: 100%;
@@ -228,7 +244,9 @@
   display: block;
   padding-left: 28px;
   
-  @include ds-typography.r-s16-h19;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 19px;
   color: ds-colors.$black;
 
   input[type="radio"] {
@@ -285,13 +303,17 @@
   flex: 1;
   
   h2 {
-    @include ds-typography.b-s16-h19;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 19px;
     margin: 0 0 8px 0;
     color: ds-colors.$black;
   }
 
   ul {
-    @include ds-typography.r-s14-h16;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -307,7 +329,9 @@
   }
 
   p {
-    @include ds-typography.r-s14-h16;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
     margin: 0;
     color: ds-colors.$purple-800;
   }
@@ -437,7 +461,9 @@
 }
 
 .counter__input {
-  @include ds-typography.r-s14-h16;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16px;
 
   box-sizing: border-box;
   width: 22px;

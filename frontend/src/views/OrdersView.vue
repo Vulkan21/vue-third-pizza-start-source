@@ -235,7 +235,9 @@ export default {
   padding: 60px 40px;
   
   p {
-    @include ds-typography.r-s18-h21;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 21px;
     margin-bottom: 30px;
     color: ds-colors.$purple-800;
   }
@@ -260,7 +262,9 @@ export default {
 }
 
 .order__number {
-  @include ds-typography.b-s18-h21;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 21px;
   flex: 1;
   
   b {
@@ -269,7 +273,9 @@ export default {
 }
 
 .order__sum {
-  @include ds-typography.r-s16-h19;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 19px;
   color: ds-colors.$purple-800;
   
   span {
@@ -304,7 +310,9 @@ export default {
 }
 
 .order__price {
-  @include ds-typography.b-s16-h19;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 19px;
   margin: 0;
   flex-shrink: 0;
   color: ds-colors.$black;
@@ -327,7 +335,9 @@ export default {
   }
   
   p {
-    @include ds-typography.r-s14-h16;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
     margin: 0;
     display: flex;
     flex-direction: column;
@@ -344,7 +354,9 @@ export default {
 }
 
 .order__address {
-  @include ds-typography.r-s14-h16;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16px;
   margin: 20px 0 0 0;
   padding-top: 16px;
   border-top: 1px solid rgba(ds-colors.$purple-400, 0.2);

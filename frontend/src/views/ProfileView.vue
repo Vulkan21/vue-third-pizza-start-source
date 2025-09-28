@@ -291,13 +291,17 @@ export default {
   flex: 1;
   
   span {
-    @include ds-typography.b-s20-h23;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 23px;
     color: ds-colors.$black;
   }
 }
 
 .user__phone {
-  @include ds-typography.r-s14-h16;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16px;
   margin: 0;
   color: ds-colors.$purple-800;
   
@@ -325,7 +329,9 @@ export default {
     margin-bottom: 16px;
     
     b {
-      @include ds-typography.b-s16-h19;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 19px;
       color: ds-colors.$black;
     }
   }
@@ -383,13 +389,17 @@ export default {
   }
   
   p {
-    @include ds-typography.r-s16-h19;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 19px;
     margin: 0 0 8px 0;
     color: ds-colors.$black;
   }
   
   small {
-    @include ds-typography.r-s14-h16;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
     color: ds-colors.$purple-800;
     font-style: italic;
   }

@@ -327,7 +327,9 @@ export default {
   padding: 60px 40px;
   
   p {
-    @include ds-typography.r-s18-h21;
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 21px;
     margin-bottom: 30px;
     color: ds-colors.$purple-800;
   }
@@ -359,7 +361,9 @@ export default {
   }
   
   &__price {
-    @include ds-typography.b-s18-h21;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 21px;
     flex-shrink: 0;
     min-width: 80px;
     text-align: right;
@@ -370,7 +374,9 @@ export default {
   }
   
   &__edit {
-    @include ds-typography.r-s14-h16;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
     background: none;
     border: none;
     color: ds-colors.$green-500;
@@ -404,7 +410,9 @@ export default {
   }
   
   &__description {
-    @include ds-typography.r-s16-h19;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 19px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -418,7 +426,9 @@ export default {
   }
   
   &__price {
-    @include ds-typography.b-s16-h19;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 19px;
     margin: 0;
   }
 }
@@ -439,7 +449,9 @@ export default {
   }
   
   &__label {
-    @include ds-typography.r-s16-h19;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 19px;
     color: ds-colors.$black;
   }
   
@@ -473,14 +485,18 @@ export default {
   }
   
   &__text {
-    @include ds-typography.r-s14-h16;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 16px;
     color: ds-colors.$white;
     margin: 0;
     text-align: center;
   }
   
   &__price {
-    @include ds-typography.b-s24-h28;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 28px;
     color: ds-colors.$white;
     margin: 0;
   }

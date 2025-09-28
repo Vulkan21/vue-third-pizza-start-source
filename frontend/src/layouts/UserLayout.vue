@@ -81,7 +81,9 @@ export default {
 }
 
 .layout__link {
-  @include ds-typography.r-s16-h19;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 19px;
   
   display: block;
   padding: 16px 20px;

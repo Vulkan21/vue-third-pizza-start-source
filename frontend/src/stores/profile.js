@@ -2,23 +2,27 @@ import { defineStore } from 'pinia'
 
 export const useProfileStore = defineStore('profile', {
   state: () => ({
-    // Данные пользователя
+    // Данные пользователя (согласно User model)
     user: {
       id: null,
       name: '',
-      phone: '',
       email: '',
+      phone: '',
       avatar: null
     },
 
-    // Адреса доставки
-    addresses: [],
+    // Адреса доставки (согласно Address model)
+    addresses: [
+      // { id: number, name: string, street: string, building: string, flat: string, comment?: string }
+    ],
     
     // Выбранный адрес для текущего заказа
-    selectedAddress: null,
+    selectedAddressId: null,
 
-    // История заказов
-    orderHistory: [],
+    // История заказов (согласно Order model)
+    orderHistory: [
+      // { id: number, phone?: string, pizzas: IPizza[], misc: IMisc[], address: Address }
+    ],
 
     // Состояние аутентификации
     isAuthenticated: false,
@@ -48,6 +52,11 @@ export const useProfileStore = defineStore('profile', {
     // Получить основной адрес
     primaryAddress: (state) => {
       return state.addresses.find(addr => addr.isPrimary) || state.addresses[0] || null
+    },
+
+    // Получить выбранный адрес
+    selectedAddress: (state) => {
+      return state.addresses.find(addr => addr.id === state.selectedAddressId) || null
     },
 
     // Получить адрес по ID
@@ -268,7 +277,7 @@ export const useProfileStore = defineStore('profile', {
 
     // Выбрать адрес для доставки
     selectAddress(addressId) {
-      this.selectedAddress = addressId
+      this.selectedAddressId = addressId
     },
 
     // Загрузить историю заказов

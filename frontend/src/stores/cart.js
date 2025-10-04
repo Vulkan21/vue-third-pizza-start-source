@@ -2,7 +2,16 @@ import { defineStore } from 'pinia'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
-    items: [],
+    // Товары в корзине
+    items: [
+      // { id: string, type: 'pizza' | 'misc', name: string, price: number, quantity: number, ... }
+    ],
+    
+    // Дополнительные товары (согласно Misc model) 
+    misc: [
+      // { id: number, name: string, image: string, price: number }
+    ],
+    
     totalPrice: 0
   }),
 
@@ -17,10 +26,32 @@ export const useCartStore = defineStore('cart', {
 
     isEmpty: (state) => state.items.length === 0,
 
+    // Получить товары по типу
+    getPizzaItems: (state) => state.items.filter(item => item.type === 'pizza'),
+    getMiscItems: (state) => state.items.filter(item => item.type === 'misc'),
+
     cartItems: (state) => state.items
   },
 
   actions: {
+    // Загрузить дополнительные товары
+    async loadMisc() {
+      try {
+        const response = await fetch('/api/misc')
+        if (response.ok) {
+          this.misc = await response.json()
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки дополнительных товаров:', error)
+        // Fallback данные
+        this.misc = [
+          { id: 1, name: 'Cola-Cola 0,5 литра', image: '/public/img/cola.svg', price: 56 },
+          { id: 2, name: 'Острый соус', image: '/public/img/sauce.svg', price: 10 },
+          { id: 3, name: 'Картошка из печи', image: '/public/img/potato.svg', price: 170 }
+        ]
+      }
+    },
+
     addItem(item) {
       const existingItem = this.items.find(cartItem => cartItem.id === item.id)
       

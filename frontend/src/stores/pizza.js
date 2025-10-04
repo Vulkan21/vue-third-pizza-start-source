@@ -5,21 +5,31 @@ export const usePizzaStore = defineStore('pizza', {
     // Конфигурация пиццы в конструкторе
     currentPizza: {
       name: '',
-      size: null,
-      dough: null,
-      sauce: null,
-      ingredients: [],
+      sizeId: null,
+      doughId: null,
+      sauceId: null,
+      ingredients: [], // { ingredientId: number, quantity: number }
       price: 0
     },
 
-    // Доступные опции для конструктора
-    sizes: [],
-    doughs: [],
-    sauces: [],
-    ingredients: [],
+    // Доступные опции для конструктора из API
+    sizes: [
+      // { id: number, name: string, image: string, multiplier: number }
+    ],
+    doughs: [
+      // { id: number, name: string, image: string, description: string, price: number }
+    ],
+    sauces: [
+      // { id: number, name: string, price: number }
+    ],
+    ingredients: [
+      // { id: number, name: string, image: string, price: number }
+    ],
 
     // Готовые пиццы (меню)
-    pizzas: [],
+    pizzas: [
+      // { id: number, name: string, image: string, ingredients: PizzaIngredient[] }
+    ],
     
     // Состояние загрузки
     loading: false,
@@ -49,28 +59,28 @@ export const usePizzaStore = defineStore('pizza', {
 
     // Проверить выбран ли ингредиент
     isIngredientSelected: (state) => (ingredientId) => {
-      return state.currentPizza.ingredients.some(ing => ing.id === ingredientId)
+      return state.currentPizza.ingredients.some(ing => ing.ingredientId === ingredientId)
     },
 
     // Получить количество выбранного ингредиента
     getIngredientQuantity: (state) => (ingredientId) => {
-      const ingredient = state.currentPizza.ingredients.find(ing => ing.id === ingredientId)
+      const ingredient = state.currentPizza.ingredients.find(ing => ing.ingredientId === ingredientId)
       return ingredient ? ingredient.quantity : 0
     },
 
     // Проверить готовность пиццы к добавлению в корзину
     isPizzaReady: (state) => {
       return state.currentPizza.name && 
-             state.currentPizza.size && 
-             state.currentPizza.dough && 
-             state.currentPizza.sauce
+             state.currentPizza.sizeId && 
+             state.currentPizza.doughId && 
+             state.currentPizza.sauceId
     },
 
     // Получить полное описание текущей пиццы
     currentPizzaDescription: (state) => {
-      const size = state.sizes.find(s => s.id === state.currentPizza.size)
-      const dough = state.doughs.find(d => d.id === state.currentPizza.dough)
-      const sauce = state.sauces.find(s => s.id === state.currentPizza.sauce)
+      const size = state.sizes.find(s => s.id === state.currentPizza.sizeId)
+      const dough = state.doughs.find(d => d.id === state.currentPizza.doughId)
+      const sauce = state.sauces.find(s => s.id === state.currentPizza.sauceId)
       
       return {
         name: state.currentPizza.name,
@@ -78,7 +88,7 @@ export const usePizzaStore = defineStore('pizza', {
         dough: dough?.name || '',
         sauce: sauce?.name || '',
         ingredients: state.currentPizza.ingredients.map(ing => {
-          const ingredient = state.ingredients.find(i => i.id === ing.id)
+          const ingredient = state.ingredients.find(i => i.id === ing.ingredientId)
           return `${ingredient?.name} (${ing.quantity})`
         }).join(', '),
         price: state.currentPizza.price
@@ -93,37 +103,48 @@ export const usePizzaStore = defineStore('pizza', {
       this.error = null
       
       try {
-        // Здесь должны быть API вызовы для загрузки данных
-        // Пока используем заглушки
-        
-        // TODO: Заменить на реальные API вызовы
-        this.sizes = [
-          { id: 1, name: 'Маленькая', multiplier: 0.8 },
-          { id: 2, name: 'Средняя', multiplier: 1.0 },
-          { id: 3, name: 'Большая', multiplier: 1.2 }
-        ]
-        
-        this.doughs = [
-          { id: 1, name: 'Тонкое', price: 0 },
-          { id: 2, name: 'Толстое', price: 50 }
-        ]
-        
-        this.sauces = [
-          { id: 1, name: 'Томатный', price: 0 },
-          { id: 2, name: 'Сливочный', price: 30 },
-          { id: 3, name: 'Барбекю', price: 40 }
-        ]
-        
-        this.ingredients = [
-          { id: 1, name: 'Моцарелла', price: 79 },
-          { id: 2, name: 'Ветчина', price: 42 },
-          { id: 3, name: 'Грибы', price: 33 },
-          { id: 4, name: 'Помидоры', price: 35 }
-        ]
+        // Загружаем данные с реальных API эндпоинтов
+        const [sizesRes, doughsRes, saucesRes, ingredientsRes] = await Promise.all([
+          fetch('/api/sizes'),
+          fetch('/api/dough'), 
+          fetch('/api/sauces'),
+          fetch('/api/ingredients')
+        ])
+
+        if (!sizesRes.ok || !doughsRes.ok || !saucesRes.ok || !ingredientsRes.ok) {
+          throw new Error('Ошибка загрузки данных конструктора')
+        }
+
+        this.sizes = await sizesRes.json()
+        this.doughs = await doughsRes.json() 
+        this.sauces = await saucesRes.json()
+        this.ingredients = await ingredientsRes.json()
         
       } catch (error) {
         this.error = error.message
         console.error('Ошибка загрузки данных конструктора:', error)
+        
+        // Fallback данные для разработки
+        this.sizes = [
+          { id: 1, name: '23 см', image: '/public/img/diameter.svg', multiplier: 1 },
+          { id: 2, name: '32 см', image: '/public/img/diameter.svg', multiplier: 2 },
+          { id: 3, name: '45 см', image: '/public/img/diameter.svg', multiplier: 3 }
+        ]
+        
+        this.doughs = [
+          { id: 1, name: 'Тонкое', image: '/public/img/dough-light.svg', description: 'Из твердых сортов пшеницы', price: 300 },
+          { id: 2, name: 'Толстое', image: '/public/img/dough-large.svg', description: 'Из твердых сортов пшеницы', price: 300 }
+        ]
+        
+        this.sauces = [
+          { id: 1, name: 'Томатный', price: 50 },
+          { id: 2, name: 'Сливочный', price: 50 }
+        ]
+        
+        this.ingredients = [
+          { id: 1, name: 'Чеддер', image: '/public/img/filling/cheddar.svg', price: 42 },
+          { id: 2, name: 'Грибы', image: '/public/img/filling/mushrooms.svg', price: 33 }
+        ]
       } finally {
         this.loading = false
       }
@@ -135,12 +156,16 @@ export const usePizzaStore = defineStore('pizza', {
       this.error = null
       
       try {
-        // TODO: Заменить на реальный API вызов
-        this.pizzas = []
+        const response = await fetch('/api/pizzas')
+        if (!response.ok) {
+          throw new Error('Ошибка загрузки пицц')
+        }
+        this.pizzas = await response.json()
         
       } catch (error) {
         this.error = error.message
         console.error('Ошибка загрузки пицц:', error)
+        this.pizzas = []
       } finally {
         this.loading = false
       }
@@ -154,31 +179,31 @@ export const usePizzaStore = defineStore('pizza', {
 
     // Выбрать размер
     selectSize(sizeId) {
-      this.currentPizza.size = sizeId
+      this.currentPizza.sizeId = sizeId
       this.calculatePrice()
     },
 
     // Выбрать тесто
     selectDough(doughId) {
-      this.currentPizza.dough = doughId
+      this.currentPizza.doughId = doughId
       this.calculatePrice()
     },
 
     // Выбрать соус
     selectSauce(sauceId) {
-      this.currentPizza.sauce = sauceId
+      this.currentPizza.sauceId = sauceId
       this.calculatePrice()
     },
 
     // Добавить ингредиент
     addIngredient(ingredientId, quantity = 1) {
-      const existingIngredient = this.currentPizza.ingredients.find(ing => ing.id === ingredientId)
+      const existingIngredient = this.currentPizza.ingredients.find(ing => ing.ingredientId === ingredientId)
       
       if (existingIngredient) {
         existingIngredient.quantity += quantity
       } else {
         this.currentPizza.ingredients.push({
-          id: ingredientId,
+          ingredientId: ingredientId,
           quantity: quantity
         })
       }
@@ -188,7 +213,7 @@ export const usePizzaStore = defineStore('pizza', {
 
     // Удалить ингредиент
     removeIngredient(ingredientId) {
-      const index = this.currentPizza.ingredients.findIndex(ing => ing.id === ingredientId)
+      const index = this.currentPizza.ingredients.findIndex(ing => ing.ingredientId === ingredientId)
       if (index !== -1) {
         this.currentPizza.ingredients.splice(index, 1)
         this.calculatePrice()
@@ -202,7 +227,7 @@ export const usePizzaStore = defineStore('pizza', {
         return
       }
       
-      const ingredient = this.currentPizza.ingredients.find(ing => ing.id === ingredientId)
+      const ingredient = this.currentPizza.ingredients.find(ing => ing.ingredientId === ingredientId)
       if (ingredient) {
         ingredient.quantity = quantity
         this.calculatePrice()
@@ -211,19 +236,19 @@ export const usePizzaStore = defineStore('pizza', {
 
     // Рассчитать цену пиццы
     calculatePrice() {
-      let basePrice = 300 // Базовая цена пиццы
+      let basePrice = 0
       
-      // Добавляем стоимость теста
-      if (this.currentPizza.dough) {
-        const dough = this.getDoughById(this.currentPizza.dough)
+      // Базовая цена от теста
+      if (this.currentPizza.doughId) {
+        const dough = this.getDoughById(this.currentPizza.doughId)
         if (dough) {
           basePrice += dough.price
         }
       }
       
       // Добавляем стоимость соуса
-      if (this.currentPizza.sauce) {
-        const sauce = this.getSauceById(this.currentPizza.sauce)
+      if (this.currentPizza.sauceId) {
+        const sauce = this.getSauceById(this.currentPizza.sauceId)
         if (sauce) {
           basePrice += sauce.price
         }
@@ -231,15 +256,15 @@ export const usePizzaStore = defineStore('pizza', {
       
       // Добавляем стоимость ингредиентов
       this.currentPizza.ingredients.forEach(ing => {
-        const ingredient = this.getIngredientById(ing.id)
+        const ingredient = this.getIngredientById(ing.ingredientId)
         if (ingredient) {
           basePrice += ingredient.price * ing.quantity
         }
       })
       
       // Применяем множитель размера
-      if (this.currentPizza.size) {
-        const size = this.getSizeById(this.currentPizza.size)
+      if (this.currentPizza.sizeId) {
+        const size = this.getSizeById(this.currentPizza.sizeId)
         if (size) {
           basePrice *= size.multiplier
         }
@@ -252,9 +277,9 @@ export const usePizzaStore = defineStore('pizza', {
     resetPizza() {
       this.currentPizza = {
         name: '',
-        size: null,
-        dough: null,
-        sauce: null,
+        sizeId: null,
+        doughId: null,
+        sauceId: null,
         ingredients: [],
         price: 0
       }

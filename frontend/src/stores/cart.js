@@ -165,9 +165,175 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
+    incrementItem(itemId) {
+      const item = this.items.find(item => item.id === itemId)
+      if (item) {
+        item.quantity += 1
+        this.calculateTotal()
+      }
+    },
+
+    decrementItem(itemId) {
+      const item = this.items.find(item => item.id === itemId)
+      if (item) {
+        if (item.quantity > 1) {
+          item.quantity -= 1
+          this.calculateTotal()
+        } else {
+          this.removeItem(itemId)
+        }
+      }
+    },
+
+    updatePizzaQuantity(pizzaId, quantity) {
+      const pizza = this.items.find(item => item.id === pizzaId && item.type === 'pizza')
+      if (pizza) {
+        if (quantity <= 0) {
+          this.removeItem(pizzaId)
+        } else {
+          pizza.quantity = quantity
+          this.calculateTotal()
+        }
+      }
+    },
+
+    incrementPizza(pizzaId) {
+      const pizza = this.items.find(item => item.id === pizzaId && item.type === 'pizza')
+      if (pizza) {
+        pizza.quantity += 1
+        this.calculateTotal()
+      }
+    },
+
+    decrementPizza(pizzaId) {
+      const pizza = this.items.find(item => item.id === pizzaId && item.type === 'pizza')
+      if (pizza) {
+        if (pizza.quantity > 1) {
+          pizza.quantity -= 1
+          this.calculateTotal()
+        } else {
+          this.removeItem(pizzaId)
+        }
+      }
+    },
+
+    clearPizzas() {
+      this.items = this.items.filter(item => item.type !== 'pizza')
+      this.calculateTotal()
+    },
+
+    duplicatePizza(pizzaId) {
+      const pizza = this.items.find(item => item.id === pizzaId && item.type === 'pizza')
+      if (pizza) {
+        const duplicatedPizza = {
+          ...pizza,
+          id: Date.now() + Math.random(),
+          quantity: 1
+        }
+        this.items.push(duplicatedPizza)
+        this.calculateTotal()
+        return duplicatedPizza.id
+      }
+      return null
+    },
+
+    setPizzaQuantityByName(pizzaName, quantity) {
+      const pizzas = this.items.filter(item => item.type === 'pizza' && item.name === pizzaName)
+      pizzas.forEach(pizza => {
+        if (quantity <= 0) {
+          this.removeItem(pizza.id)
+        } else {
+          pizza.quantity = quantity
+        }
+      })
+      this.calculateTotal()
+    },
+
     clearCart() {
       this.items = []
       this.totalPrice = 0
+    },
+
+    addMiscItem(miscId, quantity = 1) {
+      const miscItem = this.misc.find(item => item.id === miscId)
+      if (!miscItem) {
+        console.error('Дополнительный товар не найден:', miscId)
+        return
+      }
+
+      const cartItem = {
+        id: `misc-${miscId}-${Date.now()}`,
+        type: 'misc',
+        miscId: miscId,
+        name: miscItem.name,
+        image: miscItem.image,
+        price: miscItem.price,
+        quantity: quantity
+      }
+
+      this.addItem(cartItem)
+    },
+
+    clearMiscItems() {
+      this.items = this.items.filter(item => item.type !== 'misc')
+      this.calculateTotal()
+    },
+
+    updateMiscQuantity(itemId, quantity) {
+      const miscItem = this.items.find(item => item.id === itemId && item.type === 'misc')
+      if (miscItem) {
+        if (quantity <= 0) {
+          this.removeItem(itemId)
+        } else {
+          miscItem.quantity = quantity
+          this.calculateTotal()
+        }
+      }
+    },
+
+    incrementMiscItem(itemId) {
+      const miscItem = this.items.find(item => item.id === itemId && item.type === 'misc')
+      if (miscItem) {
+        miscItem.quantity += 1
+        this.calculateTotal()
+      }
+    },
+
+    decrementMiscItem(itemId) {
+      const miscItem = this.items.find(item => item.id === itemId && item.type === 'misc')
+      if (miscItem) {
+        if (miscItem.quantity > 1) {
+          miscItem.quantity -= 1
+          this.calculateTotal()
+        } else {
+          this.removeItem(itemId)
+        }
+      }
+    },
+
+    addMiscBundle(miscIds) {
+      miscIds.forEach(({ miscId, quantity = 1 }) => {
+        this.addMiscItem(miscId, quantity)
+      })
+    },
+
+    findMiscInCart(miscId) {
+      return this.items.find(item => item.type === 'misc' && item.miscId === miscId)
+    },
+
+    hasMiscItem(miscId) {
+      return this.items.some(item => item.type === 'misc' && item.miscId === miscId)
+    },
+
+    getMiscItemTotalQuantity(miscId) {
+      return this.items
+        .filter(item => item.type === 'misc' && item.miscId === miscId)
+        .reduce((total, item) => total + item.quantity, 0)
+    },
+
+    removeAllMiscById(miscId) {
+      this.items = this.items.filter(item => !(item.type === 'misc' && item.miscId === miscId))
+      this.calculateTotal()
     },
 
     calculateTotal() {
@@ -183,6 +349,75 @@ export const useCartStore = defineStore('cart', {
 
     hasItem(itemId) {
       return this.items.some(item => item.id === itemId)
+    },
+
+    applyDiscountToItem(itemId, discountPercent) {
+      const item = this.items.find(item => item.id === itemId)
+      if (item) {
+        const originalPrice = item.originalPrice || item.price
+        item.originalPrice = originalPrice
+        item.price = Math.round(originalPrice * (1 - discountPercent / 100))
+        this.calculateTotal()
+      }
+    },
+
+    applyGlobalDiscount(discountPercent) {
+      this.items.forEach(item => {
+        if (!item.originalPrice) {
+          item.originalPrice = item.price
+        }
+        item.price = Math.round(item.originalPrice * (1 - discountPercent / 100))
+      })
+      this.calculateTotal()
+    },
+
+    saveToStorage() {
+      try {
+        const cartData = {
+          items: this.items,
+          timestamp: Date.now()
+        }
+        localStorage.setItem('pizza-cart', JSON.stringify(cartData))
+      } catch (error) {
+        console.error('Ошибка сохранения корзины:', error)
+      }
+    },
+
+    loadFromStorage() {
+      try {
+        const cartData = localStorage.getItem('pizza-cart')
+        if (cartData) {
+          const parsed = JSON.parse(cartData)
+          if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+            this.items = parsed.items || []
+            this.calculateTotal()
+          }
+        }
+      } catch (error) {
+        console.error('Ошибка загрузки корзины:', error)
+      }
+    },
+
+    exportForOrder() {
+      return {
+        pizzas: this.items
+          .filter(item => item.type === 'pizza')
+          .map(pizza => ({
+            name: pizza.name,
+            sizeId: pizza.sizeId,
+            doughId: pizza.doughId,
+            sauceId: pizza.sauceId,
+            ingredients: pizza.ingredients || [],
+            quantity: pizza.quantity
+          })),
+        misc: this.items
+          .filter(item => item.type === 'misc')
+          .map(miscItem => ({
+            miscId: miscItem.miscId,
+            quantity: miscItem.quantity
+          })),
+        totalAmount: this.totalAmount
+      }
     }
   }
 })

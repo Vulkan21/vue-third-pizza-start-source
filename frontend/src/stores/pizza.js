@@ -282,6 +282,74 @@ export const usePizzaStore = defineStore('pizza', {
       }
     },
 
+    incrementIngredient(ingredientId) {
+      const ingredient = this.currentPizza.ingredients.find(ing => ing.ingredientId === ingredientId)
+      if (ingredient) {
+        ingredient.quantity += 1
+      } else {
+        this.addIngredient(ingredientId, 1)
+      }
+      this.calculatePrice()
+    },
+
+    decrementIngredient(ingredientId) {
+      const ingredient = this.currentPizza.ingredients.find(ing => ing.ingredientId === ingredientId)
+      if (ingredient) {
+        if (ingredient.quantity > 1) {
+          ingredient.quantity -= 1
+          this.calculatePrice()
+        } else {
+          this.removeIngredient(ingredientId)
+        }
+      }
+    },
+
+    setIngredientQuantity(ingredientId, quantity) {
+      if (quantity <= 0) {
+        this.removeIngredient(ingredientId)
+        return
+      }
+      
+      const ingredient = this.currentPizza.ingredients.find(ing => ing.ingredientId === ingredientId)
+      if (ingredient) {
+        ingredient.quantity = quantity
+      } else {
+        this.addIngredient(ingredientId, quantity)
+      }
+      this.calculatePrice()
+    },
+
+    clearAllIngredients() {
+      this.currentPizza.ingredients = []
+      this.calculatePrice()
+    },
+
+    maxIngredient(ingredientId, maxQuantity = 5) {
+      this.setIngredientQuantity(ingredientId, maxQuantity)
+    },
+
+    toggleIngredient(ingredientId, defaultQuantity = 1) {
+      const ingredient = this.currentPizza.ingredients.find(ing => ing.ingredientId === ingredientId)
+      if (ingredient) {
+        this.removeIngredient(ingredientId)
+      } else {
+        this.addIngredient(ingredientId, defaultQuantity)
+      }
+    },
+
+    addMultipleIngredients(ingredientsList) {
+      ingredientsList.forEach(({ ingredientId, quantity = 1 }) => {
+        this.addIngredient(ingredientId, quantity)
+      })
+    },
+
+    applyRecipe(ingredients) {
+      this.currentPizza.ingredients = []
+      ingredients.forEach(({ ingredientId, quantity }) => {
+        this.addIngredient(ingredientId, quantity)
+      })
+    },
+
     calculatePrice() {
       let basePrice = 0
       
@@ -336,11 +404,88 @@ export const usePizzaStore = defineStore('pizza', {
       
       return {
         name: description.name,
+        sizeId: this.currentPizza.sizeId,
+        doughId: this.currentPizza.doughId,
+        sauceId: this.currentPizza.sauceId,
+        ingredients: this.currentPizza.ingredients,
         size: description.size,
         dough: description.dough,
         sauce: description.sauce,
-        ingredients: description.ingredients,
+        ingredientsText: description.ingredients,
         price: this.currentPizza.price,
+      }
+    },
+
+    createFromTemplate(template) {
+      this.currentPizza.name = template.name || ''
+      this.currentPizza.sizeId = template.sizeId || null
+      this.currentPizza.doughId = template.doughId || null
+      this.currentPizza.sauceId = template.sauceId || null
+      this.currentPizza.ingredients = template.ingredients || []
+      this.calculatePrice()
+    },
+
+    saveAsTemplate(templateName) {
+      if (!this.isPizzaReady) return null
+      
+      return {
+        name: templateName,
+        sizeId: this.currentPizza.sizeId,
+        doughId: this.currentPizza.doughId,
+        sauceId: this.currentPizza.sauceId,
+        ingredients: [...this.currentPizza.ingredients],
+        price: this.currentPizza.price,
+        createdAt: new Date().toISOString()
+      }
+    },
+
+    createMargarita() {
+      this.resetPizza()
+      this.currentPizza.name = 'Маргарита'
+    },
+
+    createPepperoni() {
+      this.resetPizza()
+      this.currentPizza.name = 'Пепперони'
+    },
+
+    addRandomIngredients(count = 3) {
+      if (this.ingredients.length === 0) return
+      
+      const shuffled = [...this.ingredients].sort(() => 0.5 - Math.random())
+      const selected = shuffled.slice(0, count)
+      
+      selected.forEach(ingredient => {
+        this.addIngredient(ingredient.id, quantity)
+      })
+    },
+
+    validatePizza() {
+      const errors = []
+      
+      if (!this.currentPizza.name) {
+        errors.push('Не указано название пиццы')
+      }
+      
+      if (!this.currentPizza.sizeId) {
+        errors.push('Не выбран размер пиццы')
+      }
+      
+      if (!this.currentPizza.doughId) {
+        errors.push('Не выбрано тесто')
+      }
+      
+      if (!this.currentPizza.sauceId) {
+        errors.push('Не выбран соус')
+      }
+      
+      if (this.currentPizza.ingredients.length === 0) {
+        errors.push('Не выбраны ингредиенты')
+      }
+      
+      return {
+        isValid: errors.length === 0,
+        errors
       }
     }
   }

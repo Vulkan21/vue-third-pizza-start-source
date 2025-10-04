@@ -10,7 +10,6 @@ const app = createApp(App);
 app.use(createPinia());
 app.use(router);
 
-// Регистрируем общие компоненты глобально
 registerGlobalComponents(app);
 
 app.mount("#app");

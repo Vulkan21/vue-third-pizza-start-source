@@ -4,7 +4,7 @@
       <h1 class="title title--big">Мои данные</h1>
     </div>
 
-    <!-- User info -->
+    
     <div class="user">
       <picture>
         <source 
@@ -30,7 +30,7 @@
       </p>
     </div>
 
-    <!-- Existing addresses -->
+    
     <div 
       v-for="address in addresses" 
       :key="address.id"
@@ -55,7 +55,7 @@
         <small v-if="address.comment">{{ address.comment }}</small>
       </div>
 
-      <!-- Edit form -->
+      
       <form 
         v-else
         @submit.prevent="saveAddress(address.id)"
@@ -141,7 +141,7 @@
       </form>
     </div>
 
-    <!-- Add new address -->
+    
     <div class="layout__button">
       <button 
         type="button" 
@@ -160,14 +160,12 @@ import { reactive, ref } from 'vue'
 export default {
   name: 'ProfileView',
   setup() {
-    // User data
     const user = reactive({
       name: 'Василий Ложкин',
       phone: '+7 999-999-99-99',
       avatar: '@/assets/img/users/user5'
     })
     
-    // Addresses data
     const addresses = ref([
       {
         id: 1,
@@ -181,7 +179,6 @@ export default {
       }
     ])
     
-    // Methods
     const formatAddress = (address) => {
       let result = `${address.street}, д. ${address.house}`
       if (address.apartment) {
@@ -207,10 +204,8 @@ export default {
     const saveAddress = (addressId) => {
       const address = addresses.value.find(addr => addr.id === addressId)
       if (address && address.editData) {
-        // Update main data
         Object.assign(address, address.editData)
         
-        // Exit edit mode
         address.isEditing = false
         address.editData = {}
         
@@ -264,7 +259,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System
 @use "@/assets/scss/ds-system/ds-colors";
 @use "@/assets/scss/ds-system/ds-typography";
 
@@ -370,11 +364,9 @@ export default {
   
   &__input {
     &--size--normal {
-      // Uses default grid behavior
     }
     
     &--size--small {
-      // Uses default grid behavior  
     }
   }
   
@@ -414,7 +406,6 @@ export default {
   }
 }
 
-// Responsive
 @media (max-width: 768px) {
   .user {
     flex-direction: column;

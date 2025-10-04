@@ -4,7 +4,7 @@
       <h1 class="title title--big">История заказов</h1>
     </div>
 
-    <!-- Empty state -->
+    
     <div v-if="orders.length === 0" class="sheet order-empty">
       <p>У вас пока нет заказов</p>
       <router-link :to="{ name: 'home' }" class="button">
@@ -12,7 +12,7 @@
       </router-link>
     </div>
 
-    <!-- Orders list -->
+    
     <template v-else>
       <section 
         v-for="order in orders" 
@@ -82,7 +82,7 @@
           </li>
         </ul>
 
-        <!-- Additional items -->
+        
         <ul v-if="order.additional?.length" class="order__additional">
           <li v-for="item in order.additional" :key="item.id">
             <img 
@@ -115,7 +115,6 @@ export default {
   setup() {
     const router = useRouter()
     
-    // Mock orders data
     const orders = ref([
       {
         id: '11199929',
@@ -192,7 +191,6 @@ export default {
       }
     ])
     
-    // Methods
     const deleteOrder = (orderId) => {
       if (confirm('Вы уверены, что хотите удалить заказ?')) {
         const index = orders.value.findIndex(order => order.id === orderId)
@@ -222,7 +220,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System
 @use "@/assets/scss/ds-system/ds-colors";
 @use "@/assets/scss/ds-system/ds-typography";
 
@@ -363,7 +360,6 @@ export default {
   color: ds-colors.$purple-800;
 }
 
-// Responsive
 @media (max-width: 768px) {
   .order__wrapper {
     flex-direction: column;

@@ -20,23 +20,17 @@
 export default {
   name: "AppDrop",
   props: {
-    /**
-     * Разрешенные типы данных для drop
-     */
+    
     acceptedTypes: {
       type: Array,
       default: () => ["text/plain"],
     },
-    /**
-     * Функция валидации для проверки возможности drop
-     */
+    
     validator: {
       type: Function,
       default: () => true,
     },
-    /**
-     * Отключить drop зону
-     */
+    
     disabled: {
       type: Boolean,
       default: false,
@@ -63,7 +57,6 @@ export default {
       event.preventDefault();
       this.isDragOver = true;
 
-      // Проверяем, можем ли мы принять этот тип данных
       this.isValidDrop = this.acceptedTypes.some((type) =>
         event.dataTransfer.types.includes(type),
       );
@@ -77,7 +70,6 @@ export default {
     handleDragLeave(event) {
       if (this.disabled) return;
 
-      // Проверяем, что мы действительно покидаем drop зону
       if (!event.currentTarget.contains(event.relatedTarget)) {
         this.isDragOver = false;
         this.isValidDrop = false;
@@ -93,7 +85,6 @@ export default {
       this.isDragOver = false;
       this.isValidDrop = false;
 
-      // Получаем данные из первого подходящего типа
       let data = null;
       let dataType = null;
 
@@ -105,7 +96,6 @@ export default {
         }
       }
 
-      // Парсим JSON если это не строка
       if (data && dataType === "application/json") {
         try {
           data = JSON.parse(data);
@@ -114,7 +104,6 @@ export default {
         }
       }
 
-      // Проверяем валидность через пользовательский валидатор
       const isValid = this.validator(data, event);
 
       if (isValid) {

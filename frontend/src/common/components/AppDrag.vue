@@ -14,23 +14,17 @@
 export default {
   name: "AppDrag",
   props: {
-    /**
-     * Данные для передачи при перетаскивании
-     */
+    
     data: {
       type: [Object, String, Number],
       default: null,
     },
-    /**
-     * Можно ли перетаскивать элемент
-     */
+    
     draggable: {
       type: Boolean,
       default: true,
     },
-    /**
-     * Тип данных для drag and drop
-     */
+    
     dataType: {
       type: String,
       default: "text/plain",
@@ -48,14 +42,12 @@ export default {
 
       this.isDragging = true;
 
-      // Устанавливаем данные для передачи
       if (this.data !== null) {
         const dataString =
           typeof this.data === "string" ? this.data : JSON.stringify(this.data);
         event.dataTransfer.setData(this.dataType, dataString);
       }
 
-      // Настраиваем эффект перетаскивания
       event.dataTransfer.effectAllowed = "move";
 
       this.$emit("dragstart", {

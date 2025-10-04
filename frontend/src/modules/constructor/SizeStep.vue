@@ -27,9 +27,7 @@ export default {
     SizeSelector,
   },
   props: {
-    /**
-     * Выбранный ID размера
-     */
+    
     selectedSizeId: {
       type: [Number, String],
       default: null,
@@ -42,7 +40,6 @@ export default {
     };
   },
   mounted() {
-    // Автоматически выбираем средний размер по умолчанию
     if (!this.selectedSizeId && this.sizes.length > 1) {
       this.handleSizeChange(this.sizes[1]);
     }
@@ -62,7 +59,6 @@ export default {
   margin-bottom: 15px;
 }
 
-// Sheet styles
 .sheet {
   padding-top: 15px;
   border-radius: 8px;

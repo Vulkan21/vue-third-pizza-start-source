@@ -48,9 +48,7 @@ export default {
     IngredientSelector,
   },
   props: {
-    /**
-     * Объект с количеством каждого ингредиента
-     */
+    
     selectedIngredients: {
       type: Object,
       default: () => ({}),
@@ -99,7 +97,6 @@ export default {
     handleIngredientDrop(event) {
       const ingredient = event.data;
       if (ingredient && ingredient.id) {
-        // Увеличиваем количество ингредиента при drop в зоне ингредиентов
         const currentCount = this.getIngredientCount(ingredient.id);
         this.handleIngredientCountChange({
           ingredient,

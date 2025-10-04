@@ -22,40 +22,30 @@
 export default {
   name: "AppButton",
   props: {
-    /**
-     * Тип кнопки
-     */
+    
     type: {
       type: String,
       default: "button",
       validator: (value) => ["button", "submit", "reset"].includes(value),
     },
-    /**
-     * Вариант стиля кнопки
-     */
+    
     variant: {
       type: String,
       default: "primary",
       validator: (value) => ["primary", "secondary", "danger"].includes(value),
     },
-    /**
-     * Размер кнопки
-     */
+    
     size: {
       type: String,
       default: "medium",
       validator: (value) => ["small", "medium", "large"].includes(value),
     },
-    /**
-     * Отключить кнопку
-     */
+    
     disabled: {
       type: Boolean,
       default: false,
     },
-    /**
-     * Показать состояние загрузки
-     */
+    
     loading: {
       type: Boolean,
       default: false,
@@ -73,7 +63,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System Colors
 $white: #ffffff;
 $black: #000000;
 
@@ -88,13 +77,11 @@ $red-900: #c20532;
 $silver-200: #eaeaea;
 $silver-300: #d7d7d7;
 
-// Design System Shadows
 $shadow-medium:
   0 16px 24px rgba($black, 0.06),
   0 2px 6px rgba($black, 0.04),
   0 0 1px rgba($black, 0.04);
 
-// Typography Mixins
 @mixin typography_template($font-size, $line-height, $font-weight: 400) {
   font-size: $font-size;
   font-weight: $font-weight;
@@ -133,7 +120,6 @@ $shadow-medium:
   outline: none;
   box-shadow: $shadow-medium;
 
-  // Варианты стилей
   &--primary {
     color: $white;
     background-color: $green-500;
@@ -175,7 +161,6 @@ $shadow-medium:
     }
   }
 
-  // Размеры
   &--small {
     @include b-s14-h16;
     padding: 8px 16px;
@@ -191,7 +176,6 @@ $shadow-medium:
     padding: 16px 32px;
   }
 
-  // Состояния
   &--disabled {
     cursor: not-allowed;
     opacity: 0.5;

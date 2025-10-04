@@ -4,7 +4,7 @@
       <div class="content__wrapper">
         <h1 class="title title--big">Конструктор пиццы</h1>
 
-        <!-- Шаг 1: Выбор теста -->
+        
         <div class="content__dough">
           <DoughStep
             :selected-dough-id="pizza.selectedDough?.id"
@@ -12,7 +12,7 @@
           />
         </div>
 
-        <!-- Шаг 2: Выбор размера -->
+        
         <div class="content__diameter">
           <SizeStep
             :selected-size-id="pizza.selectedSize?.id"
@@ -20,7 +20,7 @@
           />
         </div>
 
-        <!-- Шаг 3: Выбор соуса и ингредиентов -->
+        
         <div class="content__ingredients">
           <div class="sheet">
             <h2 class="title title--small sheet__title">
@@ -28,13 +28,13 @@
             </h2>
 
             <div class="sheet__content ingredients">
-              <!-- Выбор соуса -->
+              
               <SauceStep
                 :selected-sauce-id="pizza.selectedSauce?.id"
                 @sauce-changed="handleSauceChange"
               />
 
-              <!-- Выбор ингредиентов с drag-and-drop -->
+              
               <IngredientsStep
                 :selected-ingredients="pizza.selectedIngredients"
                 @ingredients-changed="handleIngredientsChange"
@@ -44,7 +44,7 @@
           </div>
         </div>
 
-        <!-- Шаг 4: Отображение пиццы и оформление заказа -->
+        
         <div class="content__pizza">
           <PizzaCanvas
             :selected-dough="pizza.selectedDough"
@@ -59,7 +59,7 @@
       </div>
     </form>
 
-    <!-- Уведомление о drag-and-drop -->
+    
     <div v-if="isDragging" class="drag-notification">
       <p>💫 Перетащите ингредиент на пиццу для добавления</p>
     </div>
@@ -108,7 +108,6 @@ export default {
       if (this.pizza.selectedSauce)
         price += this.pizza.selectedSauce.price || 0;
 
-      // Цена ингредиентов
       Object.entries(this.pizza.selectedIngredients).forEach(
         ([ingredientId, count]) => {
           const ingredient = this.allIngredients.find(
@@ -163,19 +162,15 @@ export default {
     handleOrder(orderData = null) {
       const order = orderData || this.pizzaSummary;
 
-      // Проверяем, что заказ можно оформить
       if (!this.canOrder()) {
         this.showOrderError();
         return;
       }
 
-      // Эмитируем событие заказа
       this.$emit("pizza-ordered", order);
 
-      // Показываем уведомление
       this.showOrderSuccess(order);
 
-      // Сбрасываем конструктор
       this.resetConstructor();
     },
 
@@ -244,7 +239,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System Colors
 $white: #ffffff;
 $black: #000000;
 $green-500: #41b619;
@@ -291,7 +285,6 @@ $green-500: #41b619;
   margin-bottom: 15px;
 }
 
-// Title styles
 .title {
   box-sizing: border-box;
   width: 100%;
@@ -311,7 +304,6 @@ $green-500: #41b619;
   }
 }
 
-// Sheet styles
 .sheet {
   padding-top: 15px;
   border-radius: 8px;
@@ -346,7 +338,6 @@ $green-500: #41b619;
   padding-bottom: 20px;
 }
 
-// Drag notification
 .drag-notification {
   position: fixed;
   top: 20px;
@@ -380,7 +371,6 @@ $green-500: #41b619;
   }
 }
 
-// Responsive design
 @media (max-width: 920px) {
   .content__wrapper {
     width: 100%;

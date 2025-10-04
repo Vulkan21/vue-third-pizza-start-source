@@ -6,7 +6,7 @@
           <h1 class="title title--big">Корзина</h1>
         </div>
 
-        <!-- Empty cart state -->
+        
         <div v-if="cartItems.length === 0" class="sheet cart__empty">
           <p>В корзине нет ни одного товара</p>
           <router-link :to="{ name: 'home' }" class="button">
@@ -14,7 +14,7 @@
           </router-link>
         </div>
 
-        <!-- Cart items -->
+        
         <ul v-else class="cart-list sheet">
           <li 
             v-for="item in cartItems" 
@@ -60,7 +60,7 @@
           </li>
         </ul>
 
-        <!-- Additional items -->
+        
         <div v-if="additionalItems.length > 0" class="cart__additional">
           <ul class="additional-list">
             <li 
@@ -96,7 +96,7 @@
           </ul>
         </div>
 
-        <!-- Order form -->
+        
         <div v-if="cartItems.length > 0" class="cart__form">
           <div class="cart-form">
             <label class="cart-form__select">
@@ -147,7 +147,7 @@
       </div>
     </main>
     
-    <!-- Footer with order total -->
+    
     <section v-if="cartItems.length > 0" class="footer">
       <div class="footer__more">
         <router-link :to="{ name: 'home' }" class="button button--border button--arrow">
@@ -184,7 +184,6 @@ export default {
   setup() {
     const router = useRouter()
     
-    // Mock data
     const cartItems = ref([
       {
         id: 1,
@@ -233,7 +232,6 @@ export default {
       apartment: ''
     })
     
-    // Computed
     const totalPrice = computed(() => {
       const itemsTotal = cartItems.value.reduce((sum, item) => {
         return sum + (item.price * item.quantity)
@@ -246,7 +244,6 @@ export default {
       return itemsTotal + additionalTotal
     })
     
-    // Methods
     const updateItemQuantity = (itemId, quantity) => {
       const item = cartItems.value.find(item => item.id === itemId)
       if (item) {
@@ -262,7 +259,6 @@ export default {
     }
     
     const editItem = (itemId) => {
-      // Redirect to constructor with item data for editing
       router.push({ name: 'home', query: { edit: itemId } })
     }
     
@@ -276,7 +272,6 @@ export default {
       
       alert(`Заказ оформлен на сумму ${totalPrice.value} ₽!`)
       
-      // Clear cart and redirect
       cartItems.value = []
       additionalItems.value.forEach(item => item.quantity = 0)
       router.push({ name: 'home' })
@@ -297,7 +292,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System
 @use "@/assets/scss/ds-system/ds-colors";
 @use "@/assets/scss/ds-system/ds-typography";
 
@@ -506,7 +500,6 @@ export default {
   }
 }
 
-// Responsive
 @media (max-width: 768px) {
   .cart-list__item {
     flex-direction: column;

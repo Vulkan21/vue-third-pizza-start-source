@@ -19,9 +19,7 @@
 export default {
   name: "DoughSelector",
   props: {
-    /**
-     * Данные о типе теста
-     */
+    
     doughType: {
       type: Object,
       required: true,
@@ -34,9 +32,7 @@ export default {
         );
       },
     },
-    /**
-     * Выбранный ID теста
-     */
+    
     selectedId: {
       type: [Number, String],
       default: null,
@@ -58,14 +54,11 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System Colors
 $green-500: #41b619;
 
-// Design System Shadows
 $shadow-regular: 0 0 0 2px rgba($green-500, 0.6);
 $shadow-large: 0 0 0 2px $green-500;
 
-// Typography Mixins
 @mixin r-s16-h19 {
   font-size: 16px;
   font-weight: 400;
@@ -80,7 +73,6 @@ $shadow-large: 0 0 0 2px $green-500;
   line-height: 13px;
 }
 
-// Center Mixins
 @mixin p_center-v {
   position: absolute;
   top: 50%;
@@ -151,7 +143,6 @@ $shadow-large: 0 0 0 2px $green-500;
   }
 }
 
-// Visually hidden
 .visually-hidden {
   position: absolute;
 

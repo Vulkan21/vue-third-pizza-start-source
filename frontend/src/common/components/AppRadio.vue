@@ -19,45 +19,33 @@
 export default {
   name: "AppRadio",
   props: {
-    /**
-     * Тип поля (radio или checkbox)
-     */
+    
     type: {
       type: String,
       default: "radio",
       validator: (value) => ["radio", "checkbox"].includes(value),
     },
-    /**
-     * Имя группы
-     */
+    
     name: {
       type: String,
       required: true,
     },
-    /**
-     * Значение элемента
-     */
+    
     value: {
       type: [String, Number, Boolean],
       required: true,
     },
-    /**
-     * Текущее выбранное значение (для radio) или массив значений (для checkbox)
-     */
+    
     modelValue: {
       type: [String, Number, Boolean, Array],
       default: null,
     },
-    /**
-     * Текст метки
-     */
+    
     label: {
       type: String,
       default: "",
     },
-    /**
-     * Отключить элемент
-     */
+    
     disabled: {
       type: Boolean,
       default: false,
@@ -106,7 +94,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System Colors
 $white: #ffffff;
 $black: #000000;
 
@@ -117,7 +104,6 @@ $purple-800: #685879;
 
 $silver-200: #eaeaea;
 
-// Typography Mixins
 @mixin r-s16-h19 {
   font-size: 16px;
   font-weight: 400;
@@ -125,7 +111,6 @@ $silver-200: #eaeaea;
   line-height: 19px;
 }
 
-// Center Mixins
 @mixin p_center-v {
   position: absolute;
   top: 50%;

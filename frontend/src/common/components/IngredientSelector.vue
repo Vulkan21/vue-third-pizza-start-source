@@ -26,9 +26,7 @@ export default {
     AppCounter,
   },
   props: {
-    /**
-     * Данные об ингредиенте
-     */
+    
     ingredient: {
       type: Object,
       required: true,
@@ -36,9 +34,7 @@ export default {
         return value && typeof value.id !== "undefined" && value.name;
       },
     },
-    /**
-     * Текущее количество ингредиента
-     */
+    
     count: {
       type: Number,
       default: 0,
@@ -57,7 +53,6 @@ export default {
   },
   methods: {
     getIngredientClass(ingredientName) {
-      // Сопоставляем названия ингредиентов с их CSS классами
       const classMap = {
         Грибы: "mushrooms",
         Чеддер: "cheddar",
@@ -90,10 +85,8 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System Colors
 $white: #ffffff;
 
-// Typography Mixins
 @mixin r-s14-h16 {
   font-size: 14px;
   font-weight: 400;
@@ -101,7 +94,6 @@ $white: #ffffff;
   line-height: 16px;
 }
 
-// Center Mixins
 @mixin p_center-v {
   position: absolute;
   top: 50%;

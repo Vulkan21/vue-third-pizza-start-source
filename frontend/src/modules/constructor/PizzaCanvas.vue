@@ -1,6 +1,6 @@
 <template>
   <div class="pizza-canvas">
-    <!-- Поле для ввода названия пиццы -->
+    
     <AppInput
       v-model="pizzaName"
       name="pizza_name"
@@ -9,7 +9,7 @@
       @input="handleNameChange"
     />
 
-    <!-- Конструктор пиццы с drag-and-drop зоной -->
+    
     <div class="content__constructor">
       <AppDrop
         :accepted-types="['application/json']"
@@ -21,7 +21,7 @@
       >
         <div :class="['pizza', getPizzaFoundationClass()]">
           <div class="pizza__wrapper">
-            <!-- Отображаем ингредиенты на пицце -->
+            
             <div
               v-for="ingredient in visibleIngredients"
               :key="`${ingredient.id}-${ingredient.count}`"
@@ -34,7 +34,7 @@
           </div>
         </div>
 
-        <!-- Подсказка при перетаскивании -->
+        
         <div v-if="isDragOver" class="drop-hint">
           <span v-if="isValidDrop">Отпустите, чтобы добавить ингредиент</span>
           <span v-else>Этот ингредиент нельзя добавить на пиццу</span>
@@ -42,7 +42,7 @@
       </AppDrop>
     </div>
 
-    <!-- Результат: цена и кнопка заказа -->
+    
     <div class="content__result">
       <p>Итого: {{ totalPrice }} ₽</p>
       <AppButton :disabled="!canOrder" size="large" @click="handleOrder">
@@ -63,37 +63,27 @@ export default {
     AppButton,
   },
   props: {
-    /**
-     * Выбранное тесто
-     */
+    
     selectedDough: {
       type: Object,
       default: null,
     },
-    /**
-     * Выбранный размер
-     */
+    
     selectedSize: {
       type: Object,
       default: null,
     },
-    /**
-     * Выбранный соус
-     */
+    
     selectedSauce: {
       type: Object,
       default: null,
     },
-    /**
-     * Выбранные ингредиенты с количеством
-     */
+    
     selectedIngredients: {
       type: Object,
       default: () => ({}),
     },
-    /**
-     * Все доступные ингредиенты
-     */
+    
     allIngredients: {
       type: Array,
       default: () => [],
@@ -111,7 +101,6 @@ export default {
     visibleIngredients() {
       const ingredients = [];
 
-      // Преобразуем selectedIngredients в массив для отображения
       Object.entries(this.selectedIngredients).forEach(
         ([ingredientId, count]) => {
           const ingredient = this.allIngredients.find(
@@ -133,22 +122,18 @@ export default {
     totalPrice() {
       let price = 0;
 
-      // Базовая цена теста
       if (this.selectedDough) {
         price += this.selectedDough.price || 0;
       }
 
-      // Цена размера
       if (this.selectedSize) {
         price += this.selectedSize.price || 0;
       }
 
-      // Цена соуса
       if (this.selectedSauce) {
         price += this.selectedSauce.price || 0;
       }
 
-      // Цена ингредиентов
       Object.entries(this.selectedIngredients).forEach(
         ([ingredientId, count]) => {
           const ingredient = this.allIngredients.find(
@@ -227,7 +212,6 @@ export default {
         const currentIngredients = { ...this.selectedIngredients };
         const currentCount = currentIngredients[ingredient.id] || 0;
 
-        // Увеличиваем количество ингредиента (максимум 10)
         currentIngredients[ingredient.id] = Math.min(currentCount + 1, 10);
 
         this.emitPizzaChange({ selectedIngredients: currentIngredients });
@@ -269,7 +253,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System Colors
 $white: #ffffff;
 $black: #000000;
 $green-500: #41b619;
@@ -341,7 +324,6 @@ $green-600: #38a413;
   box-shadow: 0 4px 12px rgba($black, 0.15);
 }
 
-// Pizza styles
 .pizza {
   position: relative;
   display: block;
@@ -418,7 +400,6 @@ $green-600: #38a413;
     }
   }
 
-  // Ингредиенты
   &--ananas,
   &--ananas.pizza__filling--second::before,
   &--ananas.pizza__filling--third::after {

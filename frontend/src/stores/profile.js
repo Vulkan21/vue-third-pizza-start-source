@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 
 export const useProfileStore = defineStore('profile', {
   state: () => ({
-    // Данные пользователя (согласно User model)
     user: {
       id: null,
       name: '',
@@ -11,25 +10,18 @@ export const useProfileStore = defineStore('profile', {
       avatar: null
     },
 
-    // Адреса доставки (согласно Address model)
     addresses: [
-      // { id: number, name: string, street: string, building: string, flat: string, comment?: string }
     ],
     
-    // Выбранный адрес для текущего заказа
     selectedAddressId: null,
 
-    // История заказов (согласно Order model)
     orderHistory: [
-      // { id: number, phone?: string, pizzas: IPizza[], misc: IMisc[], address: Address }
     ],
 
-    // Состояние аутентификации
     isAuthenticated: false,
     isLoading: false,
     error: null,
 
-    // Данные для оформления заказа (гостевой режим)
     guestOrderData: {
       name: '',
       phone: '',
@@ -39,7 +31,6 @@ export const useProfileStore = defineStore('profile', {
   }),
 
   getters: {
-    // Получить полное имя пользователя
     fullUserInfo: (state) => {
       if (!state.isAuthenticated) return null
       return {
@@ -49,42 +40,35 @@ export const useProfileStore = defineStore('profile', {
       }
     },
 
-    // Получить основной адрес
     primaryAddress: (state) => {
       return state.addresses.find(addr => addr.isPrimary) || state.addresses[0] || null
     },
 
-    // Получить выбранный адрес
     selectedAddress: (state) => {
       return state.addresses.find(addr => addr.id === state.selectedAddressId) || null
     },
 
-    // Получить адрес по ID
     getAddressById: (state) => (id) => {
       return state.addresses.find(addr => addr.id === id)
     },
 
-    // Получить активные заказы
     activeOrders: (state) => {
       return state.orderHistory.filter(order => 
         ['pending', 'preparing', 'delivering'].includes(order.status)
       )
     },
 
-    // Получить завершенные заказы
     completedOrders: (state) => {
       return state.orderHistory.filter(order => 
         ['delivered', 'cancelled'].includes(order.status)
       )
     },
 
-    // Проверить заполнены ли обязательные поля для гостевого заказа
     isGuestOrderDataValid: (state) => {
       return state.guestOrderData.name.trim() !== '' && 
              state.guestOrderData.phone.trim() !== ''
     },
 
-    // Получить данные для оформления заказа (авторизованный или гостевой режим)
     orderContactData: (state) => {
       if (state.isAuthenticated) {
         return {
@@ -95,20 +79,112 @@ export const useProfileStore = defineStore('profile', {
       } else {
         return state.guestOrderData
       }
+    },
+
+    fullUserProfile: (state) => {
+      if (!state.isAuthenticated) return null
+      return {
+        ...state.user,
+        addressesCount: state.addresses.length,
+        hasAvatar: !!state.user.avatar,
+        hasPhone: !!state.user.phone,
+        ordersCount: state.orderHistory.length
+      }
+    },
+
+    formattedPhone: (state) => {
+      const phone = state.isAuthenticated ? state.user.phone : state.guestOrderData.phone
+      if (!phone) return ''
+      
+      const cleanPhone = phone.replace(/\D/g, '')
+      if (cleanPhone.length === 11 && cleanPhone.startsWith('7')) {
+        return `+7 (${cleanPhone.slice(1, 4)}) ${cleanPhone.slice(4, 7)}-${cleanPhone.slice(7, 9)}-${cleanPhone.slice(9, 11)}`
+      }
+      return phone
+    },
+
+    userInitials: (state) => {
+      if (!state.isAuthenticated || !state.user.name) return ''
+      const names = state.user.name.split(' ')
+      return names.map(name => name.charAt(0).toUpperCase()).join('')
+    },
+
+    defaultDeliveryAddress: (state) => {
+      const address = state.addresses.find(addr => addr.isPrimary) || state.addresses[0]
+      if (!address) return null
+      
+      return {
+        ...address,
+        formatted: `${address.street}, ${address.building}${address.flat ? `, кв. ${address.flat}` : ''}`,
+        shortFormatted: `${address.street}, ${address.building}`
+      }
+    },
+
+    formattedAddresses: (state) => {
+      return state.addresses.map(address => ({
+        ...address,
+        formatted: `${address.street}, ${address.building}${address.flat ? `, кв. ${address.flat}` : ''}`,
+        shortFormatted: `${address.street}, ${address.building}`,
+        isSelected: address.id === state.selectedAddressId
+      }))
+    },
+
+    orderStats: (state) => {
+      return {
+        total: state.orderHistory.length,
+        active: state.orderHistory.filter(order => 
+          ['pending', 'preparing', 'delivering'].includes(order.status)
+        ).length,
+        completed: state.orderHistory.filter(order => 
+          ['delivered'].includes(order.status)
+        ).length,
+        cancelled: state.orderHistory.filter(order => 
+          ['cancelled'].includes(order.status)
+        ).length
+      }
+    },
+
+    lastOrder: (state) => {
+      if (state.orderHistory.length === 0) return null
+      return state.orderHistory.reduce((latest, order) => 
+        new Date(order.createdAt || 0) > new Date(latest.createdAt || 0) ? order : latest,
+        state.orderHistory[0]
+      )
+    },
+
+    isProfileComplete: (state) => {
+      if (!state.isAuthenticated) return false
+      return !!(state.user.name && state.user.phone && state.user.email)
+    },
+
+    hasActiveOrders: (state) => {
+      return state.orderHistory.some(order => 
+        ['pending', 'preparing', 'delivering'].includes(order.status)
+      )
+    },
+
+    totalSpent: (state) => {
+      return state.orderHistory
+        .filter(order => order.status === 'delivered')
+        .reduce((total, order) => total + (order.totalAmount || 0), 0)
+    },
+
+    canPlaceOrder: (state) => {
+      if (state.isAuthenticated) {
+        return state.isProfileComplete && state.addresses.length > 0
+      } else {
+        return state.guestOrderData.name && state.guestOrderData.phone
+      }
     }
   },
 
   actions: {
-    // Аутентификация пользователя
     async login(credentials) {
       this.isLoading = true
       this.error = null
       
       try {
-        // TODO: Заменить на реальный API вызов
-        // const response = await authAPI.login(credentials)
         
-        // Временная заглушка
         this.user = {
           id: 1,
           name: credentials.name || 'Тестовый пользователь',
@@ -119,7 +195,6 @@ export const useProfileStore = defineStore('profile', {
         
         this.isAuthenticated = true
         
-        // Загружаем данные пользователя
         await Promise.all([
           this.loadAddresses(),
           this.loadOrderHistory()
@@ -134,7 +209,6 @@ export const useProfileStore = defineStore('profile', {
       }
     },
 
-    // Выход из системы
     logout() {
       this.user = {
         id: null,
@@ -150,14 +224,11 @@ export const useProfileStore = defineStore('profile', {
       this.error = null
     },
 
-    // Обновить данные профиля
     async updateProfile(userData) {
       this.isLoading = true
       this.error = null
       
       try {
-        // TODO: Заменить на реальный API вызов
-        // const response = await profileAPI.update(userData)
         
         this.user = { ...this.user, ...userData }
         
@@ -170,15 +241,11 @@ export const useProfileStore = defineStore('profile', {
       }
     },
 
-    // Загрузить адреса пользователя
     async loadAddresses() {
       if (!this.isAuthenticated) return
       
       try {
-        // TODO: Заменить на реальный API вызов
-        // const response = await addressAPI.getAll()
         
-        // Временная заглушка
         this.addresses = [
           {
             id: 1,
@@ -196,14 +263,11 @@ export const useProfileStore = defineStore('profile', {
       }
     },
 
-    // Добавить новый адрес
     async addAddress(addressData) {
       this.isLoading = true
       this.error = null
       
       try {
-        // TODO: Заменить на реальный API вызов
-        // const response = await addressAPI.create(addressData)
         
         const newAddress = {
           id: Date.now(),
@@ -224,14 +288,11 @@ export const useProfileStore = defineStore('profile', {
       }
     },
 
-    // Обновить адрес
     async updateAddress(addressId, addressData) {
       this.isLoading = true
       this.error = null
       
       try {
-        // TODO: Заменить на реальный API вызов
-        // const response = await addressAPI.update(addressId, addressData)
         
         const index = this.addresses.findIndex(addr => addr.id === addressId)
         if (index !== -1) {
@@ -247,21 +308,17 @@ export const useProfileStore = defineStore('profile', {
       }
     },
 
-    // Удалить адрес
     async deleteAddress(addressId) {
       this.isLoading = true
       this.error = null
       
       try {
-        // TODO: Заменить на реальный API вызов
-        // await addressAPI.delete(addressId)
         
         const index = this.addresses.findIndex(addr => addr.id === addressId)
         if (index !== -1) {
           this.addresses.splice(index, 1)
         }
         
-        // Если удален выбранный адрес, сбрасываем выбор
         if (this.selectedAddress === addressId) {
           this.selectedAddress = null
         }
@@ -275,20 +332,15 @@ export const useProfileStore = defineStore('profile', {
       }
     },
 
-    // Выбрать адрес для доставки
     selectAddress(addressId) {
       this.selectedAddressId = addressId
     },
 
-    // Загрузить историю заказов
     async loadOrderHistory() {
       if (!this.isAuthenticated) return
       
       try {
-        // TODO: Заменить на реальный API вызов
-        // const response = await ordersAPI.getHistory()
         
-        // Временная заглушка
         this.orderHistory = []
         
       } catch (error) {
@@ -296,12 +348,10 @@ export const useProfileStore = defineStore('profile', {
       }
     },
 
-    // Обновить данные гостевого заказа
     updateGuestOrderData(data) {
       this.guestOrderData = { ...this.guestOrderData, ...data }
     },
 
-    // Сбросить данные гостевого заказа
     resetGuestOrderData() {
       this.guestOrderData = {
         name: '',
@@ -311,12 +361,10 @@ export const useProfileStore = defineStore('profile', {
       }
     },
 
-    // Добавить заказ в историю
     addOrderToHistory(order) {
       this.orderHistory.unshift(order)
     },
 
-    // Обновить статус заказа
     updateOrderStatus(orderId, status) {
       const order = this.orderHistory.find(o => o.id === orderId)
       if (order) {

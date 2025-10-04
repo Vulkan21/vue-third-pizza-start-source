@@ -61,16 +61,12 @@ export default {
       isLoading.value = true
       
       try {
-        // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000))
         
-        // Mock login logic
         console.log('Логин:', form)
         
-        // Redirect to home page after login
         router.push({ name: 'home' })
         
-        // Show success message
         alert(`Добро пожаловать! Вы вошли как ${form.email}`)
       } catch (error) {
         console.error('Login error:', error)
@@ -90,7 +86,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System
 @use "@/assets/scss/ds-system/ds-colors";
 @use "@/assets/scss/ds-system/ds-typography";
 @use "@/assets/scss/ds-system/ds-shadows";

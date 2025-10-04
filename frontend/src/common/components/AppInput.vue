@@ -41,107 +41,77 @@
 export default {
   name: "AppInput",
   props: {
-    /**
-     * Тип поля
-     */
+    
     type: {
       type: String,
       default: "text",
     },
-    /**
-     * Имя поля
-     */
+    
     name: {
       type: String,
       default: "",
     },
-    /**
-     * Значение поля
-     */
+    
     modelValue: {
       type: [String, Number],
       default: "",
     },
-    /**
-     * Текст метки
-     */
+    
     label: {
       type: String,
       default: "",
     },
-    /**
-     * Placeholder
-     */
+    
     placeholder: {
       type: String,
       default: "",
     },
-    /**
-     * Отключить поле
-     */
+    
     disabled: {
       type: Boolean,
       default: false,
     },
-    /**
-     * Только чтение
-     */
+    
     readonly: {
       type: Boolean,
       default: false,
     },
-    /**
-     * Обязательное поле
-     */
+    
     required: {
       type: Boolean,
       default: false,
     },
-    /**
-     * Минимальное значение (для type="number")
-     */
+    
     min: {
       type: [String, Number],
       default: null,
     },
-    /**
-     * Максимальное значение (для type="number")
-     */
+    
     max: {
       type: [String, Number],
       default: null,
     },
-    /**
-     * Шаг (для type="number")
-     */
+    
     step: {
       type: [String, Number],
       default: null,
     },
-    /**
-     * Автодополнение
-     */
+    
     autocomplete: {
       type: String,
       default: "off",
     },
-    /**
-     * Сообщение об ошибке
-     */
+    
     errorMessage: {
       type: String,
       default: "",
     },
-    /**
-     * Текст подсказки
-     */
+    
     helpText: {
       type: String,
       default: "",
     },
-    /**
-     * Показать состояние успеха
-     */
+    
     success: {
       type: Boolean,
       default: false,
@@ -179,7 +149,6 @@ export default {
       this.$emit("focus", event);
     },
 
-    // Публичный метод для установки фокуса
     focus() {
       this.$refs.input?.focus();
     },
@@ -188,7 +157,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System Colors
 $white: #ffffff;
 $black: #000000;
 
@@ -197,7 +165,6 @@ $red-800: #e20338;
 
 $purple-400: #b3abbc;
 
-// Typography Mixins
 @mixin r-s14-h16 {
   font-size: 14px;
   font-weight: 400;

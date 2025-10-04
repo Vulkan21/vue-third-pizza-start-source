@@ -48,14 +48,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System
 @use "@/assets/scss/ds-system/ds-colors";
 @use "@/assets/scss/ds-system/ds-typography";
 @use "@/assets/scss/ds-system/ds-shadows";
 
 .layout {
   display: flex;
-  min-height: calc(100vh - 60px); // Высота header
   background-color: ds-colors.$white;
 }
 
@@ -109,10 +107,8 @@ export default {
 }
 
 .sidebar {
-  // Additional sidebar styles if needed
 }
 
-// Responsive
 @media (max-width: 768px) {
   .layout {
     flex-direction: column;

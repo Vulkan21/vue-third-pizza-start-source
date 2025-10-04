@@ -4,7 +4,7 @@
       <div class="content__wrapper">
         <h1 class="title title--big">Конструктор пиццы</h1>
 
-        <!-- Шаг 1: Выбор теста -->
+        
         <div class="content__dough">
           <DoughStep
             :selected-dough-id="pizzaState.selectedDough?.id"
@@ -12,7 +12,7 @@
           />
         </div>
 
-        <!-- Шаг 2: Выбор размера -->
+        
         <div class="content__diameter">
           <SizeStep
             :selected-size-id="pizzaState.selectedSize?.id"
@@ -20,7 +20,7 @@
           />
         </div>
 
-        <!-- Шаг 3: Выбор соуса и ингредиентов -->
+        
         <div class="content__ingredients">
           <div class="sheet">
             <h2 class="title title--small sheet__title">
@@ -28,13 +28,13 @@
             </h2>
 
             <div class="sheet__content ingredients">
-              <!-- Выбор соуса -->
+              
               <SauceStep
                 :selected-sauce-id="pizzaState.selectedSauce?.id"
                 @sauce-changed="handleSauceChange"
               />
 
-              <!-- Выбор ингредиентов с drag-and-drop -->
+              
               <IngredientsStep
                 :selected-ingredients="pizzaState.selectedIngredients"
                 @ingredients-changed="handleIngredientsChange"
@@ -44,7 +44,7 @@
           </div>
         </div>
 
-        <!-- Шаг 4: Отображение пиццы и оформление заказа -->
+        
         <div class="content__pizza">
           <PizzaCanvas
             :selected-dough="pizzaState.selectedDough"
@@ -59,12 +59,12 @@
       </div>
     </form>
 
-    <!-- Уведомление о drag-and-drop -->
+    
     <div v-if="isDraggingIngredient" class="drag-notification">
       <p>💫 Перетащите ингредиент на пиццу для добавления</p>
     </div>
 
-    <!-- Debug панель (только в development) -->
+    
     <div v-if="showDebugInfo" class="debug-panel">
       <h3>🔍 Debug Info</h3>
       <p><strong>Тесто:</strong> {{ debugInfo.doughInfo }}</p>
@@ -98,7 +98,6 @@ export default {
     PizzaCanvas,
   },
   setup() {
-    // Реактивное состояние пиццы
     const pizzaState = reactive({
       name: "",
       selectedDough: null,
@@ -107,23 +106,19 @@ export default {
       selectedIngredients: {},
     });
 
-    // Дополнительное реактивное состояние
     const isDraggingIngredient = ref(false);
     const allIngredients = ref(ingredientsData);
     const showDebugInfo = ref(import.meta.env.DEV);
 
-    // Computed свойства для расчетов
     const totalPrice = computed(() => {
       let price = 0;
 
-      // Базовая цена компонентов
       if (pizzaState.selectedDough)
         price += pizzaState.selectedDough.price || 0;
       if (pizzaState.selectedSize) price += pizzaState.selectedSize.price || 0;
       if (pizzaState.selectedSauce)
         price += pizzaState.selectedSauce.price || 0;
 
-      // Цена ингредиентов
       Object.entries(pizzaState.selectedIngredients).forEach(
         ([ingredientId, count]) => {
           const ingredient = allIngredients.value.find(
@@ -179,7 +174,6 @@ export default {
       };
     });
 
-    // Debug info computed
     const debugInfo = computed(() => {
       return {
         doughInfo: pizzaState.selectedDough
@@ -198,7 +192,6 @@ export default {
       };
     });
 
-    // Методы обработки изменений компонентов
     const handleDoughChange = (dough) => {
       pizzaState.selectedDough = dough;
       console.log("🥖 Выбрано тесто:", dough);
@@ -253,7 +246,6 @@ export default {
     const processOrder = (order) => {
       console.log("🍕 Обработка заказа:", order);
 
-      // Показываем уведомление об успешном заказе
       alert(`🍕 Заказ "${order.name}" оформлен!
       
 📋 Детали заказа:
@@ -265,7 +257,6 @@ export default {
 💰 Итого: ${order.totalPrice} ₽
 ━━━━━━━━━━━━━━━━━━━━`);
 
-      // Сброс формы после заказа
       resetPizzaState();
     };
 
@@ -291,7 +282,6 @@ ${errors.map((field) => `• ${field}`).join("\n")}`);
       console.log("🔄 Состояние пиццы сброшено");
     };
 
-    // Наблюдение за изменениями состояния (для отладки)
     watch(
       () => pizzaState,
       (newState) => {
@@ -305,20 +295,17 @@ ${errors.map((field) => `• ${field}`).join("\n")}`);
     );
 
     return {
-      // Реактивное состояние
       pizzaState,
       isDraggingIngredient,
       allIngredients,
       showDebugInfo,
 
-      // Computed свойства
       totalPrice,
       canOrder,
       ingredientsList,
       orderSummary,
       debugInfo,
 
-      // Методы
       handleDoughChange,
       handleSizeChange,
       handleSauceChange,
@@ -335,7 +322,6 @@ ${errors.map((field) => `• ${field}`).join("\n")}`);
 </script>
 
 <style lang="scss" scoped>
-// Design System Colors
 $white: #ffffff;
 $black: #000000;
 $green-500: #41b619;
@@ -382,7 +368,6 @@ $green-500: #41b619;
   margin-bottom: 15px;
 }
 
-// Removed duplicate styles - now using common-components.scss
 
 .ingredients {
   flex-direction: column;
@@ -390,7 +375,6 @@ $green-500: #41b619;
   padding-bottom: 20px;
 }
 
-// Drag notification
 .drag-notification {
   position: fixed;
   top: 20px;
@@ -412,7 +396,6 @@ $green-500: #41b619;
   }
 }
 
-// Debug panel
 .debug-panel {
   position: fixed;
   bottom: 20px;
@@ -448,7 +431,6 @@ $green-500: #41b619;
   }
 }
 
-// Responsive design
 @media (max-width: 920px) {
   .content__wrapper {
     width: 100%;

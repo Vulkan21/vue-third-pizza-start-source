@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 
 export const useDataStore = defineStore('data', {
   state: () => ({
-    // Глобальные данные приложения
     appConfig: {
       currency: 'RUB',
       currencySymbol: '₽',
@@ -11,7 +10,6 @@ export const useDataStore = defineStore('data', {
       orderProcessingTime: '30-60 минут'
     },
 
-    // Состояние загрузки для разных частей приложения
     loading: {
       ingredients: false,
       sizes: false,
@@ -21,7 +19,6 @@ export const useDataStore = defineStore('data', {
       global: false
     },
 
-    // Ошибки для разных частей приложения
     errors: {
       ingredients: null,
       sizes: null,
@@ -31,54 +28,45 @@ export const useDataStore = defineStore('data', {
       global: null
     },
 
-    // Кеш для API данных (соответствует реальным эндпоинтам)
     cache: {
       ingredients: {
         data: [],
         lastUpdated: null,
-        ttl: 5 * 60 * 1000, // 5 минут
         endpoint: '/ingredients'
       },
       sizes: {
         data: [],
         lastUpdated: null,
-        ttl: 10 * 60 * 1000, // 10 минут  
         endpoint: '/sizes'
       },
       doughs: {
         data: [],
         lastUpdated: null,
-        ttl: 10 * 60 * 1000, // 10 минут
         endpoint: '/dough'
       },
       sauces: {
         data: [],
         lastUpdated: null,
-        ttl: 10 * 60 * 1000, // 10 минут
         endpoint: '/sauces'
       },
       pizzas: {
         data: [],
         lastUpdated: null,
-        ttl: 5 * 60 * 1000, // 5 минут
         endpoint: '/pizzas'
       },
       misc: {
         data: [],
         lastUpdated: null,
-        ttl: 5 * 60 * 1000, // 5 минут
         endpoint: '/misc'
       }
     },
 
-    // Настройки приложения
     settings: {
       notifications: true,
       theme: 'light',
       language: 'ru'
     },
 
-    // Статистика и аналитика
     analytics: {
       pageViews: {},
       userActions: []
@@ -86,7 +74,6 @@ export const useDataStore = defineStore('data', {
   }),
 
   getters: {
-    // Проверить истек ли кеш для определенного типа данных
     isCacheExpired: (state) => (type) => {
       const cache = state.cache[type]
       if (!cache || !cache.lastUpdated) return true
@@ -95,18 +82,15 @@ export const useDataStore = defineStore('data', {
       return (now - cache.lastUpdated) > cache.ttl
     },
 
-    // Получить данные из кеша
     getCachedData: (state) => (type) => {
       const cache = state.cache[type]
       return cache ? cache.data : []
     },
 
-    // Проверить загружаются ли какие-либо данные
     isAnyLoading: (state) => {
       return Object.values(state.loading).some(loading => loading)
     },
 
-    // Получить все активные ошибки
     activeErrors: (state) => {
       return Object.entries(state.errors)
         .filter(([_, error]) => error !== null)
@@ -116,7 +100,6 @@ export const useDataStore = defineStore('data', {
         }, {})
     },
 
-    // Получить настройки с значениями по умолчанию
     appSettings: (state) => {
       return {
         notifications: state.settings.notifications ?? true,
@@ -125,56 +108,185 @@ export const useDataStore = defineStore('data', {
       }
     },
 
-    // Форматировать цену с валютой
     formatPrice: (state) => (price) => {
       return `${price} ${state.appConfig.currencySymbol}`
     },
 
-    // Проверить нужна ли бесплатная доставка
     isFreeDelivery: (state) => (orderAmount) => {
       return orderAmount >= state.appConfig.freeDeliveryThreshold
     },
 
-    // Рассчитать общую стоимость заказа с доставкой
     calculateTotalWithDelivery: (state) => (orderAmount) => {
       const deliveryPrice = orderAmount >= state.appConfig.freeDeliveryThreshold 
         ? 0 
         : state.appConfig.deliveryPrice
       
       return orderAmount + deliveryPrice
+    },
+
+    deliveryInfo: (state) => (orderAmount) => {
+      const isFree = orderAmount >= state.appConfig.freeDeliveryThreshold
+      const price = isFree ? 0 : state.appConfig.deliveryPrice
+      const remaining = isFree ? 0 : Math.max(0, state.appConfig.freeDeliveryThreshold - orderAmount)
+      
+      return {
+        isFree,
+        price,
+        formattedPrice: `${price} ${state.appConfig.currencySymbol}`,
+        remaining,
+        formattedRemaining: `${remaining} ${state.appConfig.currencySymbol}`,
+        message: isFree 
+          ? 'Бесплатная доставка!' 
+          : `Еще ${remaining} ${state.appConfig.currencySymbol} до бесплатной доставки`
+      }
+    },
+
+    loadingStatus: (state) => {
+      const categories = Object.keys(state.loading)
+      const loadingCategories = categories.filter(cat => state.loading[cat])
+      
+      return {
+        isLoading: loadingCategories.length > 0,
+        loadingCount: loadingCategories.length,
+        categories: loadingCategories,
+        progress: Math.round(((categories.length - loadingCategories.length) / categories.length) * 100)
+      }
+    },
+
+    errorDetails: (state) => {
+      return Object.entries(state.errors)
+        .filter(([_, error]) => error !== null)
+        .map(([category, error]) => ({
+          category,
+          message: error,
+          timestamp: Date.now()
+        }))
+    },
+
+    hasCriticalErrors: (state) => {
+      return state.errors.global !== null || 
+             Object.values(state.errors).filter(err => err !== null).length > 2
+    },
+
+    cacheStats: (state) => {
+      const cacheEntries = Object.entries(state.cache)
+      const totalEntries = cacheEntries.length
+      const expiredEntries = cacheEntries.filter(([key]) => {
+        const cache = state.cache[key]
+        if (!cache || !cache.lastUpdated) return true
+        const now = Date.now()
+        return (now - cache.lastUpdated) > cache.ttl
+      }).length
+      
+      return {
+        total: totalEntries,
+        expired: expiredEntries,
+        fresh: totalEntries - expiredEntries,
+        hitRate: totalEntries > 0 ? Math.round(((totalEntries - expiredEntries) / totalEntries) * 100) : 0
+      }
+    },
+
+    cacheSize: (state) => {
+      let totalItems = 0
+      Object.values(state.cache).forEach(cache => {
+        if (cache && cache.data && Array.isArray(cache.data)) {
+          totalItems += cache.data.length
+        }
+      })
+      return totalItems
+    },
+
+    localizedSettings: (state) => {
+      const themeNames = {
+        light: 'Светлая',
+        dark: 'Темная'
+      }
+      
+      const languageNames = {
+        ru: 'Русский',
+        en: 'English'
+      }
+      
+      return {
+        ...state.settings,
+        themeName: themeNames[state.settings.theme] || state.settings.theme,
+        languageName: languageNames[state.settings.language] || state.settings.language
+      }
+    },
+
+    appStatus: (state) => {
+      const hasErrors = Object.values(state.errors).some(err => err !== null)
+      const isLoading = Object.values(state.loading).some(loading => loading)
+      
+      return {
+        status: hasErrors ? 'error' : isLoading ? 'loading' : 'ready',
+        message: hasErrors ? 'Есть ошибки' : isLoading ? 'Загрузка...' : 'Готово',
+        isReady: !hasErrors && !isLoading,
+        hasErrors,
+        isLoading
+      }
+    },
+
+    analyticsInsights: (state) => {
+      const actions = state.analytics.userActions
+      const totalActions = actions.length
+      
+      if (totalActions === 0) return null
+      
+      const actionCounts = actions.reduce((acc, action) => {
+        acc[action.event] = (acc[action.event] || 0) + 1
+        return acc
+      }, {})
+      
+      const mostPopularAction = Object.entries(actionCounts)
+        .reduce((max, [action, count]) => count > max.count ? { action, count } : max, { count: 0 })
+      
+      return {
+        totalActions,
+        uniqueActions: Object.keys(actionCounts).length,
+        mostPopular: mostPopularAction,
+        actionsPerHour: Math.round(totalActions / Math.max(1, (Date.now() - (actions[0]?.timestamp || Date.now())) / (1000 * 60 * 60)))
+      }
+    },
+
+    shouldRefreshCache: (state) => (type) => {
+      if (!state.cache[type]) return true
+      const cache = state.cache[type]
+      if (!cache.lastUpdated) return true
+      
+      const now = Date.now()
+      const age = now - cache.lastUpdated
+      const halfLife = cache.ttl / 2
+      
+      return age > halfLife
     }
   },
 
   actions: {
-    // Установить состояние загрузки
     setLoading(type, isLoading) {
       if (this.loading.hasOwnProperty(type)) {
         this.loading[type] = isLoading
       }
     },
 
-    // Установить ошибку
     setError(type, error) {
       if (this.errors.hasOwnProperty(type)) {
         this.errors[type] = error
       }
     },
 
-    // Очистить ошибку
     clearError(type) {
       if (this.errors.hasOwnProperty(type)) {
         this.errors[type] = null
       }
     },
 
-    // Очистить все ошибки
     clearAllErrors() {
       Object.keys(this.errors).forEach(key => {
         this.errors[key] = null
       })
     },
 
-    // Кешировать данные
     cacheData(type, data) {
       if (this.cache.hasOwnProperty(type)) {
         this.cache[type] = {
@@ -185,7 +297,6 @@ export const useDataStore = defineStore('data', {
       }
     },
 
-    // Очистить кеш для определенного типа
     clearCache(type) {
       if (this.cache.hasOwnProperty(type)) {
         this.cache[type] = {
@@ -196,16 +307,13 @@ export const useDataStore = defineStore('data', {
       }
     },
 
-    // Очистить весь кеш
     clearAllCache() {
       Object.keys(this.cache).forEach(key => {
         this.clearCache(key)
       })
     },
 
-    // Загрузить данные с проверкой кеша
     async loadDataWithCache(type, customApiCall = null) {
-      // Проверяем кеш
       if (!this.isCacheExpired(type)) {
         return this.getCachedData(type)
       }
@@ -219,7 +327,6 @@ export const useDataStore = defineStore('data', {
         if (customApiCall) {
           data = await customApiCall()
         } else {
-          // Используем встроенный эндпоинт из кеша
           const cacheConfig = this.cache[type]
           if (!cacheConfig || !cacheConfig.endpoint) {
             throw new Error(`Не найден эндпоинт для ${type}`)
@@ -238,18 +345,15 @@ export const useDataStore = defineStore('data', {
         this.setError(type, error.message)
         console.error(`Ошибка загрузки ${type}:`, error)
         
-        // Возвращаем кешированные данные если есть
         return this.getCachedData(type)
       } finally {
         this.setLoading(type, false)
       }
     },
 
-    // Обновить настройки приложения
     updateSettings(newSettings) {
       this.settings = { ...this.settings, ...newSettings }
       
-      // Сохраняем в localStorage
       try {
         localStorage.setItem('app-settings', JSON.stringify(this.settings))
       } catch (error) {
@@ -257,7 +361,6 @@ export const useDataStore = defineStore('data', {
       }
     },
 
-    // Загрузить настройки из localStorage
     loadSettings() {
       try {
         const savedSettings = localStorage.getItem('app-settings')
@@ -270,7 +373,6 @@ export const useDataStore = defineStore('data', {
       }
     },
 
-    // Записать событие аналитики
     trackEvent(event, data = {}) {
       const eventData = {
         id: Date.now(),
@@ -282,13 +384,11 @@ export const useDataStore = defineStore('data', {
       
       this.analytics.userActions.push(eventData)
       
-      // Ограничиваем количество событий в памяти
       if (this.analytics.userActions.length > 100) {
         this.analytics.userActions = this.analytics.userActions.slice(-50)
       }
     },
 
-    // Отследить просмотр страницы
     trackPageView(path) {
       if (!this.analytics.pageViews[path]) {
         this.analytics.pageViews[path] = 0
@@ -298,31 +398,24 @@ export const useDataStore = defineStore('data', {
       this.trackEvent('page_view', { path })
     },
 
-    // Установить глобальную загрузку
     setGlobalLoading(isLoading) {
       this.loading.global = isLoading
     },
 
-    // Установить глобальную ошибку
     setGlobalError(error) {
       this.errors.global = error
     },
 
-    // Обновить конфигурацию приложения
     updateAppConfig(config) {
       this.appConfig = { ...this.appConfig, ...config }
     },
 
-    // Инициализация store
     async initialize() {
       try {
         this.setGlobalLoading(true)
         
-        // Загружаем настройки
         this.loadSettings()
         
-        // Здесь можно загрузить другие начальные данные
-        // await this.loadInitialData()
         
       } catch (error) {
         this.setGlobalError(error.message)
@@ -332,17 +425,14 @@ export const useDataStore = defineStore('data', {
       }
     },
 
-    // Сброс всех данных (при выходе пользователя)
     reset() {
       this.clearAllCache()
       this.clearAllErrors()
       
-      // Сбрасываем загрузки
       Object.keys(this.loading).forEach(key => {
         this.loading[key] = false
       })
       
-      // Очищаем аналитику
       this.analytics = {
         pageViews: {},
         userActions: []

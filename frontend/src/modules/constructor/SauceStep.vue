@@ -27,9 +27,7 @@ export default {
     AppRadio,
   },
   props: {
-    /**
-     * Выбранный ID соуса
-     */
+    
     selectedSauceId: {
       type: [Number, String],
       default: null,
@@ -42,7 +40,6 @@ export default {
     };
   },
   mounted() {
-    // Автоматически выбираем первый соус по умолчанию
     if (!this.selectedSauceId && this.sauces.length > 0) {
       this.handleSauceChange(this.sauces[0].id);
     }

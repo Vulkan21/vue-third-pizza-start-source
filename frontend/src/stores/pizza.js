@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 
 export const usePizzaStore = defineStore('pizza', {
   state: () => ({
-    // Конфигурация пиццы в конструкторе
     currentPizza: {
       name: '',
       sizeId: null,
@@ -12,63 +11,48 @@ export const usePizzaStore = defineStore('pizza', {
       price: 0
     },
 
-    // Доступные опции для конструктора из API
     sizes: [
-      // { id: number, name: string, image: string, multiplier: number }
     ],
     doughs: [
-      // { id: number, name: string, image: string, description: string, price: number }
     ],
     sauces: [
-      // { id: number, name: string, price: number }
     ],
     ingredients: [
-      // { id: number, name: string, image: string, price: number }
     ],
 
-    // Готовые пиццы (меню)
     pizzas: [
-      // { id: number, name: string, image: string, ingredients: PizzaIngredient[] }
     ],
     
-    // Состояние загрузки
     loading: false,
     error: null
   }),
 
   getters: {
-    // Получить размер пиццы по ID
     getSizeById: (state) => (id) => {
       return state.sizes.find(size => size.id === id)
     },
 
-    // Получить тесто по ID
     getDoughById: (state) => (id) => {
       return state.doughs.find(dough => dough.id === id)
     },
 
-    // Получить соус по ID
     getSauceById: (state) => (id) => {
       return state.sauces.find(sauce => sauce.id === id)
     },
 
-    // Получить ингредиент по ID
     getIngredientById: (state) => (id) => {
       return state.ingredients.find(ingredient => ingredient.id === id)
     },
 
-    // Проверить выбран ли ингредиент
     isIngredientSelected: (state) => (ingredientId) => {
       return state.currentPizza.ingredients.some(ing => ing.ingredientId === ingredientId)
     },
 
-    // Получить количество выбранного ингредиента
     getIngredientQuantity: (state) => (ingredientId) => {
       const ingredient = state.currentPizza.ingredients.find(ing => ing.ingredientId === ingredientId)
       return ingredient ? ingredient.quantity : 0
     },
 
-    // Проверить готовность пиццы к добавлению в корзину
     isPizzaReady: (state) => {
       return state.currentPizza.name && 
              state.currentPizza.sizeId && 
@@ -76,7 +60,6 @@ export const usePizzaStore = defineStore('pizza', {
              state.currentPizza.sauceId
     },
 
-    // Получить полное описание текущей пиццы
     currentPizzaDescription: (state) => {
       const size = state.sizes.find(s => s.id === state.currentPizza.sizeId)
       const dough = state.doughs.find(d => d.id === state.currentPizza.doughId)
@@ -93,17 +76,91 @@ export const usePizzaStore = defineStore('pizza', {
         }).join(', '),
         price: state.currentPizza.price
       }
-    }
+    },
+
+    basePizzaPrice: (state) => {
+      let basePrice = 0
+      
+      if (state.currentPizza.doughId) {
+        const dough = state.doughs.find(d => d.id === state.currentPizza.doughId)
+        if (dough) basePrice += dough.price
+      }
+      
+      if (state.currentPizza.sauceId) {
+        const sauce = state.sauces.find(s => s.id === state.currentPizza.sauceId)
+        if (sauce) basePrice += sauce.price
+      }
+      
+      state.currentPizza.ingredients.forEach(ing => {
+        const ingredient = state.ingredients.find(i => i.id === ing.ingredientId)
+        if (ingredient) basePrice += ingredient.price * ing.quantity
+      })
+      
+      return basePrice
+    },
+
+    sizeMultiplier: (state) => {
+      if (!state.currentPizza.sizeId) return 1
+      const size = state.sizes.find(s => s.id === state.currentPizza.sizeId)
+      return size?.multiplier || 1
+    },
+
+    totalIngredientsCount: (state) => {
+      return state.currentPizza.ingredients.reduce((total, ing) => total + ing.quantity, 0)
+    },
+
+    ingredientsPrice: (state) => {
+      return state.currentPizza.ingredients.reduce((total, ing) => {
+        const ingredient = state.ingredients.find(i => i.id === ing.ingredientId)
+        return total + (ingredient ? ingredient.price * ing.quantity : 0)
+      }, 0)
+    },
+
+    hasMinimalComponents: (state) => {
+      return !!(state.currentPizza.sizeId && state.currentPizza.doughId && state.currentPizza.sauceId)
+    },
+
+    pizzaCompletionPercent: (state) => {
+      let completedSteps = 0
+      const totalSteps = 4 // name, size, dough, sauce
+      
+      if (state.currentPizza.name) completedSteps++
+      if (state.currentPizza.sizeId) completedSteps++  
+      if (state.currentPizza.doughId) completedSteps++
+      if (state.currentPizza.sauceId) completedSteps++
+      
+      return Math.round((completedSteps / totalSteps) * 100)
+    },
+
+    selectedIngredientsDetails: (state) => {
+      return state.currentPizza.ingredients.map(ing => {
+        const ingredient = state.ingredients.find(i => i.id === ing.ingredientId)
+        return {
+          id: ing.ingredientId,
+          name: ingredient?.name || 'Неизвестный ингредиент',
+          image: ingredient?.image || '',
+          price: ingredient?.price || 0,
+          quantity: ing.quantity,
+          totalPrice: (ingredient?.price || 0) * ing.quantity
+        }
+      })
+    },
+
+    mostExpensiveIngredients: (state) => {
+      return [...state.ingredients]
+        .sort((a, b) => b.price - a.price)
+        .slice(0, 3)
+    },
+
+    hasMenuPizzas: (state) => state.pizzas.length > 0
   },
 
   actions: {
-    // Загрузить данные для конструктора
     async loadConstructorData() {
       this.loading = true
       this.error = null
       
       try {
-        // Загружаем данные с реальных API эндпоинтов
         const [sizesRes, doughsRes, saucesRes, ingredientsRes] = await Promise.all([
           fetch('/api/sizes'),
           fetch('/api/dough'), 
@@ -124,7 +181,6 @@ export const usePizzaStore = defineStore('pizza', {
         this.error = error.message
         console.error('Ошибка загрузки данных конструктора:', error)
         
-        // Fallback данные для разработки
         this.sizes = [
           { id: 1, name: '23 см', image: '/public/img/diameter.svg', multiplier: 1 },
           { id: 2, name: '32 см', image: '/public/img/diameter.svg', multiplier: 2 },
@@ -150,7 +206,6 @@ export const usePizzaStore = defineStore('pizza', {
       }
     },
 
-    // Загрузить готовые пиццы
     async loadPizzas() {
       this.loading = true
       this.error = null
@@ -171,31 +226,26 @@ export const usePizzaStore = defineStore('pizza', {
       }
     },
 
-    // Установить имя пиццы
     setPizzaName(name) {
       this.currentPizza.name = name
       this.calculatePrice()
     },
 
-    // Выбрать размер
     selectSize(sizeId) {
       this.currentPizza.sizeId = sizeId
       this.calculatePrice()
     },
 
-    // Выбрать тесто
     selectDough(doughId) {
       this.currentPizza.doughId = doughId
       this.calculatePrice()
     },
 
-    // Выбрать соус
     selectSauce(sauceId) {
       this.currentPizza.sauceId = sauceId
       this.calculatePrice()
     },
 
-    // Добавить ингредиент
     addIngredient(ingredientId, quantity = 1) {
       const existingIngredient = this.currentPizza.ingredients.find(ing => ing.ingredientId === ingredientId)
       
@@ -211,7 +261,6 @@ export const usePizzaStore = defineStore('pizza', {
       this.calculatePrice()
     },
 
-    // Удалить ингредиент
     removeIngredient(ingredientId) {
       const index = this.currentPizza.ingredients.findIndex(ing => ing.ingredientId === ingredientId)
       if (index !== -1) {
@@ -220,7 +269,6 @@ export const usePizzaStore = defineStore('pizza', {
       }
     },
 
-    // Обновить количество ингредиента
     updateIngredientQuantity(ingredientId, quantity) {
       if (quantity <= 0) {
         this.removeIngredient(ingredientId)
@@ -234,11 +282,9 @@ export const usePizzaStore = defineStore('pizza', {
       }
     },
 
-    // Рассчитать цену пиццы
     calculatePrice() {
       let basePrice = 0
       
-      // Базовая цена от теста
       if (this.currentPizza.doughId) {
         const dough = this.getDoughById(this.currentPizza.doughId)
         if (dough) {
@@ -246,7 +292,6 @@ export const usePizzaStore = defineStore('pizza', {
         }
       }
       
-      // Добавляем стоимость соуса
       if (this.currentPizza.sauceId) {
         const sauce = this.getSauceById(this.currentPizza.sauceId)
         if (sauce) {
@@ -254,7 +299,6 @@ export const usePizzaStore = defineStore('pizza', {
         }
       }
       
-      // Добавляем стоимость ингредиентов
       this.currentPizza.ingredients.forEach(ing => {
         const ingredient = this.getIngredientById(ing.ingredientId)
         if (ingredient) {
@@ -262,7 +306,6 @@ export const usePizzaStore = defineStore('pizza', {
         }
       })
       
-      // Применяем множитель размера
       if (this.currentPizza.sizeId) {
         const size = this.getSizeById(this.currentPizza.sizeId)
         if (size) {
@@ -273,7 +316,6 @@ export const usePizzaStore = defineStore('pizza', {
       this.currentPizza.price = Math.round(basePrice)
     },
 
-    // Сбросить конструктор
     resetPizza() {
       this.currentPizza = {
         name: '',
@@ -285,7 +327,6 @@ export const usePizzaStore = defineStore('pizza', {
       }
     },
 
-    // Получить готовую пиццу для добавления в корзину
     getPizzaForCart() {
       if (!this.isPizzaReady) {
         throw new Error('Пицца не готова к добавлению в корзину')
@@ -294,14 +335,12 @@ export const usePizzaStore = defineStore('pizza', {
       const description = this.currentPizzaDescription
       
       return {
-        id: Date.now() + Math.random(), // Временный ID
         name: description.name,
         size: description.size,
         dough: description.dough,
         sauce: description.sauce,
         ingredients: description.ingredients,
         price: this.currentPizza.price,
-        type: 'custom' // Указываем что это кастомная пицца
       }
     }
   }

@@ -16,9 +16,7 @@
 export default {
   name: "SizeSelector",
   props: {
-    /**
-     * Данные о размере
-     */
+    
     size: {
       type: Object,
       required: true,
@@ -26,16 +24,12 @@ export default {
         return value && typeof value.id !== "undefined" && value.name;
       },
     },
-    /**
-     * Индекс в массиве (для определения класса стиля)
-     */
+    
     index: {
       type: Number,
       required: true,
     },
-    /**
-     * Выбранный ID размера
-     */
+    
     selectedId: {
       type: [Number, String],
       default: null,
@@ -62,15 +56,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System Colors
 $green-100: #e1ffd7;
 $green-500: #41b619;
 
-// Design System Shadows
 $shadow-regular: 0 0 0 2px rgba($green-500, 0.6);
 $shadow-large: 0 0 0 2px $green-500;
 
-// Typography Mixins
 @mixin r-s16-h19 {
   font-size: 16px;
   font-weight: 400;
@@ -78,7 +69,6 @@ $shadow-large: 0 0 0 2px $green-500;
   line-height: 19px;
 }
 
-// Center Mixins
 @mixin p_center-v {
   position: absolute;
   top: 50%;
@@ -152,7 +142,6 @@ $shadow-large: 0 0 0 2px $green-500;
   }
 }
 
-// Visually hidden
 .visually-hidden {
   position: absolute;
 

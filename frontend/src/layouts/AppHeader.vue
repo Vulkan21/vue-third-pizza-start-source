@@ -28,7 +28,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-// Design System
 $white: #ffffff;
 $black: #000000;
 
@@ -55,7 +54,6 @@ $shadow-light:
   line-height: 16px;
 }
 
-// Header styles
 .header {
   position: relative;
   z-index: 2;
@@ -194,7 +192,6 @@ $shadow-light:
   }
 }
 
-// Logo styles
 .logo {
   display: block;
 

@@ -19,7 +19,8 @@
 
 <script>
 import { SizeSelector } from "@/common/components";
-import sizesData from "@/mocks/sizes.json";
+import { usePizzaStore } from "@/stores/pizza";
+import { storeToRefs } from "pinia";
 
 export default {
   name: "SizeStep",
@@ -34,9 +35,12 @@ export default {
     },
   },
   emits: ["size-changed"],
-  data() {
+  setup() {
+    const pizzaStore = usePizzaStore();
+    const { sizes } = storeToRefs(pizzaStore);
+    
     return {
-      sizes: sizesData,
+      sizes,
     };
   },
   mounted() {

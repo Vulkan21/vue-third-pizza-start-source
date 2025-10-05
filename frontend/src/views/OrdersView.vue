@@ -107,106 +107,183 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useProfileStore, useCartStore } from '@/stores'
 
 export default {
   name: 'OrdersView',
   setup() {
     const router = useRouter()
     
-    const orders = ref([
-      {
-        id: '11199929',
-        total: 1564,
-        address: 'Тест (или если адрес новый - писать целиком)',
-        items: [
+    const profileStore = useProfileStore()
+    const cartStore = useCartStore()
+    
+    onMounted(async () => {
+      if (!profileStore.isAuthenticated) {
+        await profileStore.login({
+          name: 'Василий Ложкин',
+          phone: '+7 999-999-99-99',
+          email: 'vasily@example.com'
+        })
+      }
+      
+      await profileStore.loadOrderHistory()
+    })
+    
+    const orders = computed(() => {
+      if (profileStore.orderHistory.length === 0) {
+        return [
           {
-            id: 1,
-            name: 'Капричоза',
-            price: 782,
-            quantity: 1,
-            details: {
-              size: '30 см',
-              dough: 'на тонком тесте',
-              sauce: 'томатный',
-              ingredients: 'грибы, лук, ветчина, пармезан, ананас, бекон, блю чиз'
-            }
+            id: '11199929',
+            total: 1564,
+            address: profileStore.defaultDeliveryAddress?.formatted || 'Тест (или если адрес новый - писать целиком)',
+            items: [
+              {
+                id: 1,
+                name: 'Капричоза',
+                price: 782,
+                quantity: 1,
+                details: {
+                  size: '30 см',
+                  dough: 'на тонком тесте',
+                  sauce: 'томатный',
+                  ingredients: 'грибы, лук, ветчина, пармезан, ананас, бекон, блю чиз'
+                }
+              },
+              {
+                id: 2,
+                name: 'Моя любимая',
+                price: 782,
+                quantity: 2,
+                details: {
+                  size: '30 см',
+                  dough: 'на тонком тесте',
+                  sauce: 'томатный',
+                  ingredients: 'грибы, лук, ветчина, пармезан, ананас'
+                }
+              }
+            ],
+            additional: [
+              {
+                id: 1,
+                name: 'Coca-Cola 0,5 литра',
+                image: '@/assets/img/cola.svg',
+                price: 56
+              },
+              {
+                id: 2,
+                name: 'Острый соус',
+                image: '@/assets/img/sauce.svg',
+                price: 30
+              },
+              {
+                id: 3,
+                name: 'Картошка из печи',
+                image: '@/assets/img/potato.svg',
+                price: 170
+              }
+            ]
           },
           {
-            id: 2,
-            name: 'Моя любимая',
-            price: 782,
-            quantity: 2,
-            details: {
-              size: '30 см',
-              dough: 'на тонком тесте',
-              sauce: 'томатный',
-              ingredients: 'грибы, лук, ветчина, пармезан, ананас'
-            }
-          }
-        ],
-        additional: [
-          {
-            id: 1,
-            name: 'Coca-Cola 0,5 литра',
-            image: '@/assets/img/cola.svg',
-            price: 56
-          },
-          {
-            id: 2,
-            name: 'Острый соус',
-            image: '@/assets/img/sauce.svg',
-            price: 30
-          },
-          {
-            id: 3,
-            name: 'Картошка из печи',
-            image: '@/assets/img/potato.svg',
-            price: 170
+            id: '11199930',
+            total: 1200,
+            address: profileStore.defaultDeliveryAddress?.formatted || 'Невский пр., д. 15, кв. 42',
+            items: [
+              {
+                id: 3,
+                name: 'Маргарита',
+                price: 650,
+                quantity: 1,
+                description: '30 см, на тонком тесте. Соус: томатный. Начинка: грибы, лук, ветчина, пармезан, ананас'
+              },
+              {
+                id: 4,
+                name: 'Пепперони',
+                price: 720,
+                quantity: 1,
+                description: '30 см, на тонком тесте. Соус: томатный. Начинка: пепперони, моцарелла'
+              }
+            ],
+            additional: []
           }
         ]
-      },
-      {
-        id: '11199930',
-        total: 1200,
-        address: 'Невский пр., д. 15, кв. 42',
-        items: [
-          {
-            id: 3,
-            name: 'Маргарита',
-            price: 650,
-            quantity: 1,
-            description: '30 см, на тонком тесте. Соус: томатный. Начинка: грибы, лук, ветчина, пармезан, ананас'
-          },
-          {
-            id: 4,
-            name: 'Пепперони',
-            price: 720,
-            quantity: 1,
-            description: '30 см, на тонком тесте. Соус: томатный. Начинка: пепперони, моцарелла'
-          }
-        ],
-        additional: []
       }
-    ])
+      
+      return profileStore.orderHistory.map(order => ({
+        id: order.id,
+        total: order.totalAmount || 0,
+        address: order.deliveryAddress?.formatted || 'Адрес не указан',
+        items: order.pizzas?.map(pizza => ({
+          id: pizza.id || Date.now(),
+          name: pizza.name,
+          price: pizza.price || 0,
+          quantity: pizza.quantity || 1,
+          details: pizza.details || {
+            size: pizza.size || 'Не указан',
+            dough: pizza.dough || 'Не указано',
+            sauce: pizza.sauce || 'Не указан',
+            ingredients: pizza.ingredients || 'Не указаны'
+          }
+        })) || [],
+        additional: order.misc?.map(miscItem => ({
+          id: miscItem.id,
+          name: miscItem.name,
+          image: miscItem.image,
+          price: miscItem.price
+        })) || []
+      }))
+    })
     
-    const deleteOrder = (orderId) => {
+    const deleteOrder = async (orderId) => {
       if (confirm('Вы уверены, что хотите удалить заказ?')) {
-        const index = orders.value.findIndex(order => order.id === orderId)
-        if (index !== -1) {
-          orders.value.splice(index, 1)
-          console.log(`Заказ #${orderId} удален`)
+        try {
+          const orderIndex = profileStore.orderHistory.findIndex(order => order.id === orderId)
+          if (orderIndex !== -1) {
+            profileStore.orderHistory.splice(orderIndex, 1)
+            console.log(`Заказ #${orderId} удален`)
+          }
+        } catch (error) {
+          console.error('Ошибка удаления заказа:', error)
+          alert('Ошибка при удалении заказа')
         }
       }
     }
     
-    const repeatOrder = (orderId) => {
-      const order = orders.value.find(order => order.id === orderId)
-      if (order) {
+    const repeatOrder = async (orderId) => {
+      try {
+        const order = orders.value.find(order => order.id === orderId)
+        if (!order) {
+          throw new Error('Заказ не найден')
+        }
+        
+        cartStore.clearCart()
+        
+        order.items.forEach(item => {
+          const cartItem = {
+            id: `repeat-${Date.now()}-${Math.random()}`,
+            name: item.name,
+            type: 'pizza',
+            price: item.price,
+            quantity: item.quantity,
+            ...item.details
+          }
+          cartStore.addItem(cartItem)
+        })
+        
+        order.additional.forEach(item => {
+          cartStore.addMiscItem(item.id)
+        })
+        
+        cartStore.saveToStorage()
+        
         console.log('Повтор заказа:', order)
         alert(`Заказ #${orderId} добавлен в корзину!`)
         router.push({ name: 'cart' })
+        
+      } catch (error) {
+        console.error('Ошибка повтора заказа:', error)
+        alert('Ошибка при повторе заказа: ' + error.message)
       }
     }
     

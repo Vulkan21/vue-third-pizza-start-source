@@ -19,7 +19,8 @@
 
 <script>
 import { AppRadio } from "@/common/components";
-import saucesData from "@/mocks/sauces.json";
+import { usePizzaStore } from "@/stores/pizza";
+import { storeToRefs } from "pinia";
 
 export default {
   name: "SauceStep",
@@ -34,9 +35,12 @@ export default {
     },
   },
   emits: ["sauce-changed"],
-  data() {
+  setup() {
+    const pizzaStore = usePizzaStore();
+    const { sauces } = storeToRefs(pizzaStore);
+    
     return {
-      sauces: saucesData,
+      sauces,
     };
   },
   mounted() {

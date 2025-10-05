@@ -43,36 +43,43 @@
 </template>
 
 <script>
-import { reactive, ref } from 'vue'
+import { reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useProfileStore } from '@/stores'
 
 export default {
   name: 'LoginView',
   setup() {
     const router = useRouter()
-    const isLoading = ref(false)
+    
+    const profileStore = useProfileStore()
     
     const form = reactive({
       email: '',
       password: ''
     })
     
+    const isLoading = computed(() => profileStore.isLoading)
+    
     const handleSubmit = async () => {
-      isLoading.value = true
-      
       try {
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        if (!form.email || !form.password) {
+          alert('Заполните все поля')
+          return
+        }
         
-        console.log('Логин:', form)
+        await profileStore.login({
+          email: form.email,
+          password: form.password,
+        })
         
         router.push({ name: 'home' })
         
         alert(`Добро пожаловать! Вы вошли как ${form.email}`)
+        
       } catch (error) {
         console.error('Login error:', error)
-        alert('Ошибка входа. Попробуйте еще раз.')
-      } finally {
-        isLoading.value = false
+        alert('Ошибка входа: ' + error.message)
       }
     }
     

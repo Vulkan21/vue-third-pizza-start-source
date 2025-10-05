@@ -172,9 +172,10 @@
 </template>
 
 <script>
-import { reactive, ref, computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { AppCounter } from '@/common/components'
+import { useCartStore, useProfileStore, useDataStore } from '@/stores'
 
 export default {
   name: 'CartView',
@@ -184,102 +185,142 @@ export default {
   setup() {
     const router = useRouter()
     
-    const cartItems = ref([
-      {
-        id: 1,
-        name: 'Капричоза',
-        size: '30 см',
-        dough: 'тонкое тесто',
-        sauce: 'томатный',
-        ingredients: 'грибы, лук, ветчина, пармезан, ананас',
-        price: 782,
-        quantity: 1
-      },
-      {
-        id: 2,
-        name: 'Любимая пицца',
-        size: '30 см',
-        dough: 'тонкое тесто',
-        sauce: 'томатный',
-        ingredients: 'грибы, лук, ветчина, пармезан, ананас, бекон, блю чиз',
-        price: 782,
-        quantity: 2
-      }
-    ])
+    const cartStore = useCartStore()
+    const profileStore = useProfileStore() 
+    const dataStore = useDataStore()
     
-    const additionalItems = ref([
-      {
-        id: 1,
-        name: 'Coca-Cola 0,5 литра',
-        image: '@/assets/img/cola.svg',
-        price: 56,
-        quantity: 2
-      },
-      {
-        id: 2,
-        name: 'Острый соус',
-        image: '@/assets/img/sauce.svg',
-        price: 30,
-        quantity: 2
-      }
-    ])
-    
-    const orderForm = reactive({
-      deliveryType: 'pickup',
-      phone: '',
-      street: '',
-      house: '',
-      apartment: ''
+    onMounted(async () => {
+      await cartStore.loadMisc()
+      cartStore.loadFromStorage()
     })
     
-    const totalPrice = computed(() => {
-      const itemsTotal = cartItems.value.reduce((sum, item) => {
-        return sum + (item.price * item.quantity)
-      }, 0)
-      
-      const additionalTotal = additionalItems.value.reduce((sum, item) => {
-        return sum + (item.price * item.quantity)
-      }, 0)
-      
-      return itemsTotal + additionalTotal
+    const cartItems = computed(() => cartStore.getPizzaItems)
+    const additionalItems = computed(() => {
+      return cartStore.misc.map(miscItem => {
+        const inCart = cartStore.findMiscInCart(miscItem.id)
+        return {
+          ...miscItem,
+          quantity: inCart ? inCart.quantity : 0
+        }
+      }).filter(item => item.quantity > 0)
+    })
+    
+    const totalPrice = computed(() => cartStore.totalAmount)
+    
+    const orderForm = computed({
+      get: () => {
+        if (profileStore.isAuthenticated) {
+          return {
+            deliveryType: profileStore.selectedAddressId ? 'address' : 'pickup',
+            phone: profileStore.user.phone,
+            street: '',
+            house: '',
+            apartment: ''
+          }
+        } else {
+          return {
+            deliveryType: 'pickup',
+            phone: profileStore.guestOrderData.phone,
+            street: profileStore.guestOrderData.street || '',
+            house: profileStore.guestOrderData.house || '',
+            apartment: profileStore.guestOrderData.apartment || ''
+          }
+        }
+      },
+      set: (value) => {
+        if (!profileStore.isAuthenticated) {
+          profileStore.updateGuestOrderData({
+            phone: value.phone,
+            street: value.street,
+            house: value.house,
+            apartment: value.apartment
+          })
+        }
+      }
     })
     
     const updateItemQuantity = (itemId, quantity) => {
-      const item = cartItems.value.find(item => item.id === itemId)
-      if (item) {
-        item.quantity = quantity
-      }
+      cartStore.updateItemQuantity(itemId, quantity)
+      cartStore.saveToStorage()
     }
     
     const updateAdditionalItem = (itemId, quantity) => {
-      const item = additionalItems.value.find(item => item.id === itemId)
-      if (item) {
-        item.quantity = quantity
+      if (quantity > 0) {
+        if (!cartStore.hasMiscItem(itemId)) {
+          cartStore.addMiscItem(itemId, quantity)
+        } else {
+          const cartItem = cartStore.findMiscInCart(itemId)
+          if (cartItem) {
+            cartStore.updateMiscQuantity(cartItem.id, quantity)
+          }
+        }
+      } else {
+        cartStore.removeAllMiscById(itemId)
       }
+      cartStore.saveToStorage()
     }
     
     const editItem = (itemId) => {
       router.push({ name: 'home', query: { edit: itemId } })
     }
     
-    const handleSubmit = () => {
-      console.log('Order submitted:', {
-        items: cartItems.value,
-        additional: additionalItems.value.filter(item => item.quantity > 0),
-        form: orderForm,
-        total: totalPrice.value
-      })
-      
-      alert(`Заказ оформлен на сумму ${totalPrice.value} ₽!`)
-      
-      cartItems.value = []
-      additionalItems.value.forEach(item => item.quantity = 0)
-      router.push({ name: 'home' })
+    const handleSubmit = async () => {
+      try {
+        if (cartStore.isEmpty) {
+          alert('Корзина пуста!')
+          return
+        }
+        
+        if (!profileStore.canPlaceOrder) {
+          alert('Заполните контактные данные!')
+          return
+        }
+        
+        const orderData = {
+          ...cartStore.exportForOrder(),
+          contactData: profileStore.orderContactData,
+          deliveryAddress: profileStore.selectedAddress || orderForm.value,
+          timestamp: new Date().toISOString()
+        }
+        
+        console.log('Order submitted:', orderData)
+        
+        alert(`Заказ оформлен на сумму ${totalPrice.value} ₽!
+        
+📋 Детали заказа:
+━━━━━━━━━━━━━━━━━━━━━━━━━
+🍕 Пицц: ${cartStore.pizzaItemsCount} шт.
+🥤 Дополнительно: ${cartStore.miscItemsCount} шт.
+📞 Телефон: ${orderData.contactData.phone}
+💰 Итого: ${orderData.totalAmount} ₽
+━━━━━━━━━━━━━━━━━━━━━━━━━`)
+        
+        if (profileStore.isAuthenticated) {
+          profileStore.addOrderToHistory({
+            id: Date.now().toString(),
+            ...orderData,
+            status: 'pending'
+          })
+        }
+        
+        cartStore.clearCart()
+        cartStore.saveToStorage()
+        
+        if (!profileStore.isAuthenticated) {
+          profileStore.resetGuestOrderData()
+        }
+        
+        router.push({ name: 'home' })
+        
+      } catch (error) {
+        console.error('Ошибка при оформлении заказа:', error)
+        alert('Ошибка при оформлении заказа. Попробуйте еще раз.')
+      }
     }
     
     return {
       cartItems,
-      additionalItems,
+      additionalItems, 
       orderForm,
       totalPrice,
       updateItemQuantity,

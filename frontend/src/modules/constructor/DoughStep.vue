@@ -18,7 +18,8 @@
 
 <script>
 import { DoughSelector } from "@/common/components";
-import doughData from "@/mocks/dough.json";
+import { usePizzaStore } from "@/stores/pizza";
+import { storeToRefs } from "pinia";
 
 export default {
   name: "DoughStep",
@@ -33,9 +34,12 @@ export default {
     },
   },
   emits: ["dough-changed"],
-  data() {
+  setup() {
+    const pizzaStore = usePizzaStore();
+    const { doughs } = storeToRefs(pizzaStore);
+    
     return {
-      doughTypes: doughData,
+      doughTypes: doughs,
     };
   },
   mounted() {

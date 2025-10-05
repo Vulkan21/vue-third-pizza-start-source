@@ -155,94 +155,115 @@
 </template>
 
 <script>
-import { reactive, ref } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useProfileStore } from '@/stores'
 
 export default {
   name: 'ProfileView',
   setup() {
-    const user = reactive({
-      name: 'Василий Ложкин',
-      phone: '+7 999-999-99-99',
-      avatar: '@/assets/img/users/user5'
+    const profileStore = useProfileStore()
+    
+    onMounted(async () => {
+      if (!profileStore.isAuthenticated) {
+        await profileStore.login({
+          name: 'Василий Ложкин',
+          phone: '+7 999-999-99-99',
+          email: 'vasily@example.com'
+        })
+      }
     })
     
-    const addresses = ref([
-      {
-        id: 1,
-        name: 'Адрес №1. Тест',
-        street: 'Невский пр.',
-        house: '22',
-        apartment: '46',
-        comment: 'Позвоните, пожалуйста, от проходной',
-        isEditing: false,
-        editData: {}
-      }
-    ])
+    const user = computed(() => ({
+      name: profileStore.fullUserInfo?.name || 'Пользователь',
+      phone: profileStore.formattedPhone,
+      avatar: profileStore.user.avatar || '@/assets/img/users/user5'
+    }))
+    
+    const addresses = computed(() => {
+      return profileStore.formattedAddresses.map(addr => ({
+        ...addr,
+        isEditing: addr.isEditing || false,
+        editData: addr.editData || {}
+      }))
+    })
     
     const formatAddress = (address) => {
-      let result = `${address.street}, д. ${address.house}`
-      if (address.apartment) {
-        result += `, кв. ${address.apartment}`
-      }
-      return result
+      return address.formatted || `${address.street}, д. ${address.building}${address.apartment ? `, кв. ${address.apartment}` : ''}`
     }
     
-    const startEditing = (addressId) => {
-      const address = addresses.value.find(addr => addr.id === addressId)
+    const startEditing = async (addressId) => {
+      const address = profileStore.getAddressById(addressId)
       if (address) {
-        address.editData = {
-          name: address.name,
-          street: address.street,
-          house: address.house,
-          apartment: address.apartment,
-          comment: address.comment
-        }
         address.isEditing = true
-      }
-    }
-    
-    const saveAddress = (addressId) => {
-      const address = addresses.value.find(addr => addr.id === addressId)
-      if (address && address.editData) {
-        Object.assign(address, address.editData)
-        
-        address.isEditing = false
-        address.editData = {}
-        
-        console.log('Адрес сохранен:', address)
-      }
-    }
-    
-    const deleteAddress = (addressId) => {
-      if (confirm('Вы уверены, что хотите удалить адрес?')) {
-        const index = addresses.value.findIndex(addr => addr.id === addressId)
-        if (index !== -1) {
-          addresses.value.splice(index, 1)
-          console.log(`Адрес #${addressId} удален`)
+        address.editData = {
+          name: address.name || '',
+          street: address.street || '',
+          house: address.building || address.house || '',
+          apartment: address.apartment || address.flat || '',
+          comment: address.comment || ''
         }
       }
     }
     
-    const addNewAddress = () => {
-      const newId = Math.max(...addresses.value.map(addr => addr.id)) + 1
-      const newAddress = {
-        id: newId,
-        name: '',
-        street: '',
-        house: '',
-        apartment: '',
-        comment: '',
-        isEditing: true,
-        editData: {
+    const saveAddress = async (addressId) => {
+      try {
+        const address = profileStore.getAddressById(addressId)
+        if (address && address.editData) {
+          await profileStore.updateAddress(addressId, {
+            name: address.editData.name,
+            street: address.editData.street,
+            building: address.editData.house,
+            apartment: address.editData.apartment,
+            comment: address.editData.comment
+          })
+          
+          address.isEditing = false
+          address.editData = {}
+          
+          console.log('Адрес сохранен:', address)
+        }
+      } catch (error) {
+        console.error('Ошибка сохранения адреса:', error)
+        alert('Ошибка при сохранении адреса')
+      }
+    }
+    
+    const deleteAddress = async (addressId) => {
+      if (confirm('Вы уверены, что хотите удалить адрес?')) {
+        try {
+          await profileStore.deleteAddress(addressId)
+          console.log(`Адрес #${addressId} удален`)
+        } catch (error) {
+          console.error('Ошибка удаления адреса:', error)
+          alert('Ошибка при удалении адреса')
+        }
+      }
+    }
+    
+    const addNewAddress = async () => {
+      try {
+        const newAddress = await profileStore.addAddress({
           name: '',
           street: '',
-          house: '',
+          building: '',
           apartment: '',
           comment: ''
+        })
+        
+        if (newAddress) {
+          newAddress.isEditing = true
+          newAddress.editData = {
+            name: '',
+            street: '',
+            house: '',
+            apartment: '',
+            comment: ''
+          }
         }
+      } catch (error) {
+        console.error('Ошибка добавления адреса:', error)
+        alert('Ошибка при добавлении нового адреса')
       }
-      
-      addresses.value.push(newAddress)
     }
     
     return {

@@ -23,9 +23,9 @@
         </button>
       </template>
       <template v-else>
-        <router-link :to="{ name: 'login' }" class="header__login">
-          <span>Войти</span>
-        </router-link>
+      <router-link :to="{ name: 'login' }" class="header__login">
+        <span>Войти</span>
+      </router-link>
       </template>
     </div>
   </header>

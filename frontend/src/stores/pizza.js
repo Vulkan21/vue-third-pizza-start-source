@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { sizesService, doughService, saucesService, ingredientsService } from '@/services'
 
 export const usePizzaStore = defineStore('pizza', {
   state: () => ({
@@ -162,65 +163,20 @@ export const usePizzaStore = defineStore('pizza', {
       
       try {
         const [sizesRes, doughsRes, saucesRes, ingredientsRes] = await Promise.all([
-          fetch('/api/sizes'),
-          fetch('/api/dough'), 
-          fetch('/api/sauces'),
-          fetch('/api/ingredients')
+          sizesService.getAll(),
+          doughService.getAll(),
+          saucesService.getAll(),
+          ingredientsService.getAll()
         ])
 
-        if (!sizesRes.ok || !doughsRes.ok || !saucesRes.ok || !ingredientsRes.ok) {
-          throw new Error('Ошибка загрузки данных конструктора')
-        }
-
-        this.sizes = await sizesRes.json()
-        this.doughs = await doughsRes.json() 
-        this.sauces = await saucesRes.json()
-        this.ingredients = await ingredientsRes.json()
+        this.sizes = sizesRes.data
+        this.doughs = doughsRes.data
+        this.sauces = saucesRes.data
+        this.ingredients = ingredientsRes.data
         
       } catch (error) {
-        this.error = error.message
+        this.error = error.response?.data?.message || error.message
         console.error('Ошибка загрузки данных конструктора:', error)
-        
-        this.sizes = [
-          { id: 1, name: '23 см', image: '/public/img/diameter.svg', multiplier: 1 },
-          { id: 2, name: '32 см', image: '/public/img/diameter.svg', multiplier: 2 },
-          { id: 3, name: '45 см', image: '/public/img/diameter.svg', multiplier: 3 }
-        ]
-        
-        this.doughs = [
-          { id: 1, name: 'Тонкое', image: '/public/img/dough-light.svg', description: 'Из твердых сортов пшеницы', price: 300 },
-          { id: 2, name: 'Толстое', image: '/public/img/dough-large.svg', description: 'Из твердых сортов пшеницы', price: 300 }
-        ]
-        
-        this.sauces = [
-          { id: 1, name: 'Томатный', price: 50 },
-          { id: 2, name: 'Сливочный', price: 50 }
-        ]
-        
-        this.ingredients = [
-          { id: 1, name: 'Чеддер', image: '/public/img/filling/cheddar.svg', price: 42 },
-          { id: 2, name: 'Грибы', image: '/public/img/filling/mushrooms.svg', price: 33 }
-        ]
-      } finally {
-        this.loading = false
-      }
-    },
-
-    async loadPizzas() {
-      this.loading = true
-      this.error = null
-      
-      try {
-        const response = await fetch('/api/pizzas')
-        if (!response.ok) {
-          throw new Error('Ошибка загрузки пицц')
-        }
-        this.pizzas = await response.json()
-        
-      } catch (error) {
-        this.error = error.message
-        console.error('Ошибка загрузки пицц:', error)
-        this.pizzas = []
       } finally {
         this.loading = false
       }

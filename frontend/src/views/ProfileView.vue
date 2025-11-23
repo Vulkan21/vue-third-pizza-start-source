@@ -7,13 +7,8 @@
     
     <div class="user">
       <picture>
-        <source 
-          type="image/webp" 
-          :srcset="`${user.avatar}@2x.webp 1x, ${user.avatar}@4x.webp 2x`"
-        />
         <img 
-          :src="`${user.avatar}@2x.jpg`" 
-          :srcset="`${user.avatar}@4x.jpg`"
+          :src="userAvatar" 
           :alt="user.name" 
           width="72" 
           height="72"
@@ -156,28 +151,22 @@
 
 <script>
 import { computed, onMounted } from 'vue'
-import { useProfileStore } from '@/stores'
+import { useProfileStore, useAuthStore } from '@/stores'
+import { getUserAvatar } from '@/common/helpers'
 
 export default {
   name: 'ProfileView',
   setup() {
     const profileStore = useProfileStore()
-    
-    onMounted(async () => {
-      if (!profileStore.isAuthenticated) {
-        await profileStore.login({
-          name: 'Василий Ложкин',
-          phone: '+7 999-999-99-99',
-          email: 'vasily@example.com'
-        })
-      }
-    })
+    const authStore = useAuthStore()
     
     const user = computed(() => ({
-      name: profileStore.fullUserInfo?.name || 'Пользователь',
+      name: authStore.userName || profileStore.fullUserInfo?.name || 'Пользователь',
       phone: profileStore.formattedPhone,
-      avatar: profileStore.user.avatar || '@/assets/img/users/user5'
+      avatar: authStore.currentUser?.avatar || profileStore.user.avatar
     }))
+    
+    const userAvatar = computed(() => getUserAvatar(user.value.avatar))
     
     const addresses = computed(() => {
       return profileStore.formattedAddresses.map(addr => ({
@@ -268,6 +257,7 @@ export default {
     
     return {
       user,
+      userAvatar,
       addresses,
       formatAddress,
       startEditing,

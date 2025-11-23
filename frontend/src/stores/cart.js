@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { miscService } from '@/services'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
@@ -116,17 +117,11 @@ export const useCartStore = defineStore('cart', {
   actions: {
     async loadMisc() {
       try {
-        const response = await fetch('/api/misc')
-        if (response.ok) {
-          this.misc = await response.json()
-        }
+        const response = await miscService.getAll()
+        this.misc = response.data
       } catch (error) {
         console.error('Ошибка загрузки дополнительных товаров:', error)
-        this.misc = [
-          { id: 1, name: 'Cola-Cola 0,5 литра', image: '/public/img/cola.svg', price: 56 },
-          { id: 2, name: 'Острый соус', image: '/public/img/sauce.svg', price: 10 },
-          { id: 3, name: 'Картошка из печи', image: '/public/img/potato.svg', price: 170 }
-        ]
+        this.misc = []
       }
     },
 

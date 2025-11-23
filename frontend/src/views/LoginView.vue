@@ -38,7 +38,7 @@
           <span v-if="errors.password" class="input__error">{{ errors.password }}</span>
         </label>
       </div>
-
+      
       <div v-if="authError" class="sign-form__error">
         {{ authError }}
       </div>
@@ -67,7 +67,7 @@ export default {
       email: '',
       password: ''
     })
-
+    
     const errors = reactive({
       email: '',
       password: ''
@@ -128,9 +128,9 @@ export default {
       const isPasswordValid = validatePassword()
       
       if (!isEmailValid || !isPasswordValid) {
-        return
-      }
-      
+          return
+        }
+        
       try {
         await authStore.login({
           email: form.email,

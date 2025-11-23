@@ -151,7 +151,7 @@ export default {
       }
 
       const pizzaForCart = this.pizzaStore.getPizzaForCart();
-      
+
       this.$emit("pizza-ordered", pizzaForCart);
 
       this.showOrderSuccess(pizzaForCart);

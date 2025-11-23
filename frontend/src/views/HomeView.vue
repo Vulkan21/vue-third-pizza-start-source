@@ -60,9 +60,11 @@
     </form>
 
     
-    <div v-if="isDraggingIngredient" class="drag-notification">
-      <p>💫 Перетащите ингредиент на пиццу для добавления</p>
-    </div>
+    <Transition name="fade">
+      <div v-if="isDraggingIngredient" class="drag-notification">
+        <p>💫 Перетащите ингредиент на пиццу для добавления</p>
+      </div>
+    </Transition>
 
     
     <div v-if="showDebugInfo" class="debug-panel">

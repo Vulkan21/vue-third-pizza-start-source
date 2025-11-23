@@ -22,23 +22,27 @@
         <div :class="['pizza', getPizzaFoundationClass()]">
           <div class="pizza__wrapper">
             
-            <div
-              v-for="ingredient in visibleIngredients"
-              :key="`${ingredient.id}-${ingredient.count}`"
-              :class="[
-                'pizza__filling',
-                `pizza__filling--${ingredient.cssClass}`,
-                getIngredientModifier(ingredient.count),
-              ]"
-            />
+            <TransitionGroup name="scale">
+              <div
+                v-for="ingredient in visibleIngredients"
+                :key="`${ingredient.id}-${ingredient.count}`"
+                :class="[
+                  'pizza__filling',
+                  `pizza__filling--${ingredient.cssClass}`,
+                  getIngredientModifier(ingredient.count),
+                ]"
+              />
+            </TransitionGroup>
           </div>
         </div>
 
         
-        <div v-if="isDragOver" class="drop-hint">
-          <span v-if="isValidDrop">Отпустите, чтобы добавить ингредиент</span>
-          <span v-else>Этот ингредиент нельзя добавить на пиццу</span>
-        </div>
+        <Transition name="fade">
+          <div v-if="isDragOver" class="drop-hint">
+            <span v-if="isValidDrop">Отпустите, чтобы добавить ингредиент</span>
+            <span v-else>Этот ингредиент нельзя добавить на пиццу</span>
+          </div>
+        </Transition>
       </AppDrop>
     </div>
 

@@ -121,7 +121,8 @@ export const useCartStore = defineStore('cart', {
         this.misc = response.data
       } catch (error) {
         console.error('Ошибка загрузки дополнительных товаров:', error)
-        this.misc = []
+        const miscData = await import('@/mocks/misc.json')
+        this.misc = miscData.default
       }
     },
 

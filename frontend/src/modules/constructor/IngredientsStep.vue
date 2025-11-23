@@ -9,7 +9,7 @@
           class="ingredients__drop-zone"
           @drop="handleIngredientDrop"
         >
-          <ul class="ingredients__list">
+          <TransitionGroup name="list" tag="ul" class="ingredients__list">
             <li v-for="ingredient in availableIngredients" :key="ingredient.id">
               <AppDrag
                 :data="ingredient"
@@ -25,7 +25,7 @@
                 />
               </AppDrag>
             </li>
-          </ul>
+          </TransitionGroup>
 
           <div v-if="isDragActive" class="drop-hint">
             Перетащите ингредиенты на пиццу или используйте счетчики

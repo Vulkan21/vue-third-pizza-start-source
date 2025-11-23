@@ -1,5 +1,9 @@
 <template>
-  <RouterView />
+  <RouterView v-slot="{ Component, route }">
+    <Transition name="slide" mode="out-in">
+      <component :is="Component" :key="route.path" />
+    </Transition>
+  </RouterView>
 </template>
 
 <style lang="scss">
@@ -7,6 +11,7 @@
 @use "@/assets/scss/ds-system/ds-shadows";
 @use "@/assets/scss/ds-system/ds-typography";
 @import "@/assets/scss/app.scss";
+@import "@/assets/styles/transitions.scss";
 
 body {
   justify-content: center;

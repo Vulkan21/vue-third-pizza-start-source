@@ -25,7 +25,11 @@ export const usePizzaStore = defineStore('pizza', {
     ],
     
     loading: false,
-    error: null
+    error: null,
+    
+    dataLoaded: false,
+    
+    loadingPromise: null
   }),
 
   getters: {
@@ -158,28 +162,53 @@ export const usePizzaStore = defineStore('pizza', {
 
   actions: {
     async loadConstructorData() {
+      if (this.loadingPromise) {
+        return this.loadingPromise
+      }
+      
+      if (this.dataLoaded) {
+        return
+      }
+      
       this.loading = true
       this.error = null
       
-      try {
-        const [sizesRes, doughsRes, saucesRes, ingredientsRes] = await Promise.all([
-          sizesService.getAll(),
-          doughService.getAll(),
-          saucesService.getAll(),
-          ingredientsService.getAll()
-        ])
+      this.loadingPromise = (async () => {
+        try {
+          const [sizesRes, doughsRes, saucesRes, ingredientsRes] = await Promise.all([
+            sizesService.getAll(),
+            doughService.getAll(),
+            saucesService.getAll(),
+            ingredientsService.getAll()
+          ])
 
-        this.sizes = sizesRes.data
-        this.doughs = doughsRes.data
-        this.sauces = saucesRes.data
-        this.ingredients = ingredientsRes.data
-        
-      } catch (error) {
-        this.error = error.response?.data?.message || error.message
-        console.error('Ошибка загрузки данных конструктора:', error)
-      } finally {
-        this.loading = false
-      }
+          this.sizes = sizesRes.data
+          this.doughs = doughsRes.data
+          this.sauces = saucesRes.data
+          this.ingredients = ingredientsRes.data
+          this.dataLoaded = true
+          
+        } catch (error) {
+          this.error = error.response?.data?.message || error.message
+          console.error('Ошибка загрузки данных конструктора:', error)
+          
+          const doughData = await import('@/mocks/dough.json')
+          const sizesData = await import('@/mocks/sizes.json')
+          const saucesData = await import('@/mocks/sauces.json')
+          const ingredientsData = await import('@/mocks/ingredients.json')
+          
+          this.doughs = doughData.default
+          this.sizes = sizesData.default
+          this.sauces = saucesData.default
+          this.ingredients = ingredientsData.default
+          this.dataLoaded = true
+        } finally {
+          this.loading = false
+          this.loadingPromise = null
+        }
+      })()
+      
+      return this.loadingPromise
     },
 
     setPizzaName(name) {

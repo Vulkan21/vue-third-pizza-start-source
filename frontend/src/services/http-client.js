@@ -1,4 +1,5 @@
 import axios from 'axios'
+import tokenService from './token-service'
 
 
 class HttpClient {
@@ -17,7 +18,7 @@ class HttpClient {
   setupInterceptors() {
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('token')
+        const token = tokenService.getToken()
         if (token) {
           config.headers.Authorization = `Bearer ${token}`
         }

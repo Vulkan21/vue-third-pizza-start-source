@@ -11,19 +11,54 @@
       </router-link>
     </div>
     <div class="header__cart">
-      <router-link :to="{ name: 'cart' }">0 ₽</router-link>
+      <router-link :to="{ name: 'cart' }">{{ cartTotal }} ₽</router-link>
     </div>
     <div class="header__user">
-      <router-link :to="{ name: 'login' }" class="header__login">
-        <span>Войти</span>
-      </router-link>
+      <template v-if="isAuthenticated">
+        <router-link :to="{ name: 'profile' }" class="header__profile">
+          <span>{{ userName }}</span>
+        </router-link>
+        <button @click="handleLogout" class="header__logout">
+          <span>Выйти</span>
+        </button>
+      </template>
+      <template v-else>
+        <router-link :to="{ name: 'login' }" class="header__login">
+          <span>Войти</span>
+        </router-link>
+      </template>
     </div>
   </header>
 </template>
 
 <script>
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore, useCartStore } from '@/stores'
+
 export default {
   name: "AppHeader",
+  setup() {
+    const router = useRouter()
+    const authStore = useAuthStore()
+    const cartStore = useCartStore()
+
+    const isAuthenticated = computed(() => authStore.isAuthenticated)
+    const userName = computed(() => authStore.userName || 'Пользователь')
+    const cartTotal = computed(() => cartStore.totalAmount || 0)
+
+    const handleLogout = async () => {
+      await authStore.logout()
+      router.push({ name: 'home' })
+    }
+
+    return {
+      isAuthenticated,
+      userName,
+      cartTotal,
+      handleLogout
+    }
+  }
 };
 </script>
 
@@ -160,7 +195,33 @@ $shadow-light:
   }
 }
 
+.header__profile {
+  margin-right: 10px;
+}
+
 .header__logout {
+  display: flex;
+  align-items: center;
+  
+  padding: 14px 20px;
+  border: none;
+  cursor: pointer;
+  
+  background-color: $green-500;
+  transition: 0.3s;
+
+  &:hover:not(:active) {
+    background-color: $green-400;
+  }
+
+  &:active {
+    background-color: $green-600;
+  }
+
+  &:focus {
+    opacity: 0.5;
+  }
+  
   &::before {
     display: inline-block;
 
@@ -173,6 +234,11 @@ $shadow-light:
 
     background: url(@/assets/img/login.svg) no-repeat center;
     background-size: auto 50%;
+  }
+  
+  span {
+    @include r-s14-h16;
+    color: $white;
   }
 }
 

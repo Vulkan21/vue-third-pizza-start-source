@@ -10,32 +10,40 @@
     
     <form @submit.prevent="handleSubmit">
       <div class="sign-form__input">
-        <label class="input">
+        <label class="input" :class="{ 'input--error': errors.email }">
           <span>E-mail</span>
           <input 
             v-model="form.email"
             type="email" 
             name="email" 
             placeholder="example@mail.ru"
-            required
+            @blur="validateEmail"
+            @input="clearEmailError"
           />
+          <span v-if="errors.email" class="input__error">{{ errors.email }}</span>
         </label>
       </div>
 
       <div class="sign-form__input">
-        <label class="input">
+        <label class="input" :class="{ 'input--error': errors.password }">
           <span>Пароль</span>
           <input 
             v-model="form.password"
             type="password" 
             name="password" 
             placeholder="***********"
-            required
+            @blur="validatePassword"
+            @input="clearPasswordError"
           />
+          <span v-if="errors.password" class="input__error">{{ errors.password }}</span>
         </label>
       </div>
+
+      <div v-if="authError" class="sign-form__error">
+        {{ authError }}
+      </div>
       
-      <button type="submit" class="button" :disabled="isLoading">
+      <button type="submit" class="button" :disabled="isLoading || !isFormValid">
         {{ isLoading ? 'Вход...' : 'Авторизоваться' }}
       </button>
     </form>
@@ -44,48 +52,109 @@
 
 <script>
 import { reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useProfileStore } from '@/stores'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores'
 
 export default {
   name: 'LoginView',
   setup() {
     const router = useRouter()
+    const route = useRoute()
     
-    const profileStore = useProfileStore()
+    const authStore = useAuthStore()
     
     const form = reactive({
       email: '',
       password: ''
     })
+
+    const errors = reactive({
+      email: '',
+      password: ''
+    })
     
-    const isLoading = computed(() => profileStore.isLoading)
-    
+    const isLoading = computed(() => authStore.loading)
+    const authError = computed(() => authStore.error)
+    const isFormValid = computed(() => {
+      return form.email && 
+             form.password && 
+             !errors.email && 
+             !errors.password
+    })
+
+    const validateEmail = () => {
+      if (!form.email) {
+        errors.email = 'Email обязателен'
+        return false
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      if (!emailRegex.test(form.email)) {
+        errors.email = 'Введите корректный email'
+        return false
+      }
+      
+      errors.email = ''
+      return true
+    }
+
+    const validatePassword = () => {
+      if (!form.password) {
+        errors.password = 'Пароль обязателен'
+        return false
+      }
+      
+      if (form.password.length < 6) {
+        errors.password = 'Пароль должен содержать минимум 6 символов'
+        return false
+      }
+      
+      errors.password = ''
+      return true
+    }
+
+    const clearEmailError = () => {
+      errors.email = ''
+      authStore.clearError()
+    }
+
+    const clearPasswordError = () => {
+      errors.password = ''
+      authStore.clearError()
+    }
+
     const handleSubmit = async () => {
+      const isEmailValid = validateEmail()
+      const isPasswordValid = validatePassword()
+      
+      if (!isEmailValid || !isPasswordValid) {
+        return
+      }
+      
       try {
-        if (!form.email || !form.password) {
-          alert('Заполните все поля')
-          return
-        }
-        
-        await profileStore.login({
+        await authStore.login({
           email: form.email,
-          password: form.password,
+          password: form.password
         })
         
-        router.push({ name: 'home' })
-        
-        alert(`Добро пожаловать! Вы вошли как ${form.email}`)
+        const redirect = route.query.redirect || '/'
+        router.push(redirect)
         
       } catch (error) {
         console.error('Login error:', error)
-        alert('Ошибка входа: ' + error.message)
       }
     }
     
     return {
       form,
+      errors,
       isLoading,
+      authError,
+      isFormValid,
+      validateEmail,
+      validatePassword,
+      clearEmailError,
+      clearPasswordError,
       handleSubmit
     }
   }
@@ -153,6 +222,32 @@ export default {
   &:last-of-type {
     margin-bottom: 32px;
   }
+}
+
+.input {
+  &--error {
+    input {
+      border-color: #ff3333;
+    }
+  }
+  
+  &__error {
+    display: block;
+    margin-top: 8px;
+    color: #ff3333;
+    font-size: 14px;
+  }
+}
+
+.sign-form__error {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: rgba(255, 51, 51, 0.1);
+  border: 1px solid #ff3333;
+  border-radius: 8px;
+  color: #ff3333;
+  font-size: 14px;
+  text-align: center;
 }
 
 .button {

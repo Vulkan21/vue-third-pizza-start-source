@@ -170,28 +170,28 @@ $shadow-light:
     &:focus {
       opacity: 0.5;
     }
-  }
+    
+    img {
+      display: inline-block;
 
-  img {
-    display: inline-block;
+      width: 32px;
+      height: 32px;
+      margin-right: 8px;
 
-    width: 32px;
-    height: 32px;
-    margin-right: 8px;
+      vertical-align: middle;
 
-    vertical-align: middle;
+      border-radius: 50%;
+    }
 
-    border-radius: 50%;
-  }
+    span {
+      @include r-s14-h16;
 
-  span {
-    @include r-s14-h16;
+      display: inline-block;
 
-    display: inline-block;
+      vertical-align: middle;
 
-    vertical-align: middle;
-
-    color: $white;
+      color: $white;
+    }
   }
 }
 

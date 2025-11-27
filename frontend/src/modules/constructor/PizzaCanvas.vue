@@ -124,18 +124,14 @@ export default {
     },
 
     totalPrice() {
-      let price = 0;
+      let basePrice = 0;
 
       if (this.selectedDough) {
-        price += this.selectedDough.price || 0;
-      }
-
-      if (this.selectedSize) {
-        price += this.selectedSize.price || 0;
+        basePrice += this.selectedDough.price || 0;
       }
 
       if (this.selectedSauce) {
-        price += this.selectedSauce.price || 0;
+        basePrice += this.selectedSauce.price || 0;
       }
 
       Object.entries(this.selectedIngredients).forEach(
@@ -144,12 +140,16 @@ export default {
             (ing) => ing.id == ingredientId,
           );
           if (ingredient && count > 0) {
-            price += (ingredient.price || 0) * count;
+            basePrice += (ingredient.price || 0) * count;
           }
         },
       );
 
-      return price;
+      if (this.selectedSize && this.selectedSize.multiplier) {
+        basePrice *= this.selectedSize.multiplier;
+      }
+
+      return Math.round(basePrice);
     },
 
     canOrder() {

@@ -6,15 +6,6 @@
 
     
     <div class="user">
-      <picture>
-        <img 
-          :src="userAvatar" 
-          :alt="user.name" 
-          width="72" 
-          height="72"
-        />
-      </picture>
-      
       <div class="user__name">
         <span>{{ user.name }}</span>
       </div>
@@ -33,7 +24,7 @@
     >
       <div v-if="!address.isEditing" class="sheet address-form">
         <div class="address-form__header">
-          <b>{{ address.name }}</b>
+          <b>г. {{ address.name || 'Город не указан' }}</b>
           <div class="address-form__edit">
             <button 
               type="button" 
@@ -46,8 +37,6 @@
         </div>
         
         <p>{{ formatAddress(address) }}</p>
-        
-        <small v-if="address.comment">{{ address.comment }}</small>
       </div>
 
       
@@ -57,17 +46,17 @@
         class="address-form address-form--opened sheet"
       >
         <div class="address-form__header">
-          <b>{{ address.name || 'Новый адрес' }}</b>
+          <b>{{ address.editData?.name ? `г. ${address.editData.name}` : (address.name ? `г. ${address.name}` : 'Новый адрес') }}</b>
         </div>
 
         <div class="address-form__wrapper">
-          <div class="address-form__input">
+          <div class="address-form__input address-form__input--size--normal">
             <label class="input">
-              <span>Название адреса*</span>
+              <span>Город*</span>
               <input 
                 v-model="address.editData.name"
                 type="text" 
-                placeholder="Введите название адреса" 
+                placeholder="Введите название города" 
                 required
               />
             </label>
@@ -89,7 +78,7 @@
             <label class="input">
               <span>Дом*</span>
               <input 
-                v-model="address.editData.house"
+                v-model="address.editData.building"
                 type="text" 
                 placeholder="Введите номер дома" 
                 required
@@ -101,20 +90,9 @@
             <label class="input">
               <span>Квартира</span>
               <input 
-                v-model="address.editData.apartment"
+                v-model="address.editData.flat"
                 type="text" 
                 placeholder="Введите № квартиры"
-              />
-            </label>
-          </div>
-          
-          <div class="address-form__input">
-            <label class="input">
-              <span>Комментарий</span>
-              <input 
-                v-model="address.editData.comment"
-                type="text" 
-                placeholder="Введите комментарий"
               />
             </label>
           </div>
@@ -152,7 +130,6 @@
 <script>
 import { computed, onMounted } from 'vue'
 import { useProfileStore, useAuthStore } from '@/stores'
-import { getUserAvatar } from '@/common/helpers'
 
 export default {
   name: 'ProfileView',
@@ -161,23 +138,20 @@ export default {
     const authStore = useAuthStore()
     
     const user = computed(() => ({
-      name: authStore.userName || profileStore.fullUserInfo?.name || 'Пользователь',
-      phone: profileStore.formattedPhone,
-      avatar: authStore.currentUser?.avatar || profileStore.user.avatar
+      name: authStore.currentUser?.name || authStore.userName || 'Пользователь',
+      phone: authStore.currentUser?.phone || ''
     }))
     
-    const userAvatar = computed(() => getUserAvatar(user.value.avatar))
-    
     const addresses = computed(() => {
-      return profileStore.formattedAddresses.map(addr => ({
-        ...addr,
-        isEditing: addr.isEditing || false,
-        editData: addr.editData || {}
-      }))
+      return profileStore.addresses
     })
     
     const formatAddress = (address) => {
-      return address.formatted || `${address.street}, д. ${address.building}${address.apartment ? `, кв. ${address.apartment}` : ''}`
+      if (!address.street || !address.building) {
+        return 'Адрес не указан'
+      }
+      const cityPart = address.name ? `г. ${address.name}, ` : ''
+      return `${cityPart}ул. ${address.street}, д. ${address.building}${address.flat ? `, кв. ${address.flat}` : ''}`
     }
     
     const startEditing = async (addressId) => {
@@ -187,9 +161,8 @@ export default {
         address.editData = {
           name: address.name || '',
           street: address.street || '',
-          house: address.building || address.house || '',
-          apartment: address.apartment || address.flat || '',
-          comment: address.comment || ''
+          building: address.building || '',
+          flat: address.flat || ''
         }
       }
     }
@@ -198,66 +171,80 @@ export default {
       try {
         const address = profileStore.getAddressById(addressId)
         if (address && address.editData) {
-          await profileStore.updateAddress(addressId, {
+          if (!address.editData.name || !address.editData.street || !address.editData.building) {
+            alert('Заполните все обязательные поля: город, улица и дом')
+            return
+          }
+          
+          const addressData = {
             name: address.editData.name,
             street: address.editData.street,
-            building: address.editData.house,
-            apartment: address.editData.apartment,
-            comment: address.editData.comment
-          })
+            building: address.editData.building,
+            flat: address.editData.flat || ''
+          }
           
-          address.isEditing = false
-          address.editData = {}
-          
-          console.log('Адрес сохранен:', address)
+          if (address.isNew) {
+            await profileStore.addAddress(addressData)
+            const index = profileStore.addresses.findIndex(a => a.id === addressId)
+            if (index !== -1) {
+              profileStore.addresses.splice(index, 1)
+            }
+          } else {
+            await profileStore.updateAddress(addressId, addressData)
+          }
         }
       } catch (error) {
-        console.error('Ошибка сохранения адреса:', error)
-        alert('Ошибка при сохранении адреса')
+        const errorMessage = error.response?.data?.error?.message || error.message || 'Неизвестная ошибка'
+        alert(`Ошибка при сохранении адреса: ${errorMessage}`)
       }
     }
     
     const deleteAddress = async (addressId) => {
+      const address = profileStore.getAddressById(addressId)
+      
+      if (address && address.isNew) {
+        const index = profileStore.addresses.findIndex(a => a.id === addressId)
+        if (index !== -1) {
+          profileStore.addresses.splice(index, 1)
+        }
+        return
+      }
+      
       if (confirm('Вы уверены, что хотите удалить адрес?')) {
         try {
           await profileStore.deleteAddress(addressId)
-          console.log(`Адрес #${addressId} удален`)
         } catch (error) {
-          console.error('Ошибка удаления адреса:', error)
           alert('Ошибка при удалении адреса')
         }
       }
     }
     
-    const addNewAddress = async () => {
-      try {
-        const newAddress = await profileStore.addAddress({
+    const addNewAddress = () => {
+      const tempAddress = {
+        id: `temp_${Date.now()}`,
+        name: '',
+        street: '',
+        building: '',
+        flat: '',
+        isEditing: true,
+        isNew: true,
+        editData: {
           name: '',
           street: '',
           building: '',
-          apartment: '',
-          comment: ''
-        })
-        
-        if (newAddress) {
-          newAddress.isEditing = true
-          newAddress.editData = {
-            name: '',
-            street: '',
-            house: '',
-            apartment: '',
-            comment: ''
-          }
+          flat: ''
         }
-      } catch (error) {
-        console.error('Ошибка добавления адреса:', error)
-        alert('Ошибка при добавлении нового адреса')
       }
+      
+      profileStore.addresses.push(tempAddress)
     }
+    
+    onMounted(async () => {
+      await profileStore.loadAddresses()
+    })
     
     return {
       user,
-      userAvatar,
       addresses,
       formatAddress,
       startEditing,
@@ -282,14 +269,6 @@ export default {
   align-items: center;
   gap: 20px;
   margin-bottom: 40px;
-  
-  picture,
-  img {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
 }
 
 .user__name {
@@ -359,7 +338,7 @@ export default {
       }
       
       &::before {
-        content: "✎";
+        content: "\270E";
         font-size: 14px;
         color: ds-colors.$purple-800;
       }

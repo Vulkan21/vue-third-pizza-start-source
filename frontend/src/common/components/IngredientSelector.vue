@@ -7,12 +7,12 @@
     </span>
 
     <AppCounter
-      v-model:value="currentCount"
+      :model-value="currentCount"
       :min="0"
       :max="10"
       variant="orange"
       class="ingredient-selector__counter"
-      @change="handleCountChange"
+      @update:modelValue="handleCountChange"
     />
   </li>
 </template>
@@ -74,6 +74,7 @@ export default {
     },
 
     handleCountChange(newCount) {
+      this.currentCount = newCount;
       this.$emit("update:count", newCount);
       this.$emit("change", {
         ingredient: this.ingredient,

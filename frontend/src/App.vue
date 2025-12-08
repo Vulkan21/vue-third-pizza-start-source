@@ -6,6 +6,17 @@
   </RouterView>
 </template>
 
+<script setup>
+import { onMounted } from 'vue'
+import { useCartStore } from '@/stores'
+
+const cartStore = useCartStore()
+
+onMounted(() => {
+  cartStore.loadFromStorage()
+})
+</script>
+
 <style lang="scss">
 @use "@/assets/scss/ds-system/ds-colors";
 @use "@/assets/scss/ds-system/ds-shadows";

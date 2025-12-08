@@ -47,6 +47,37 @@
     </div>
 
     
+    <div class="pizza-summary">
+      <h3 class="pizza-summary__title">{{ pizzaName || 'Моя пицца' }}</h3>
+      
+      <div v-if="selectedDough" class="pizza-summary__item">
+        <span class="pizza-summary__label">Тесто:</span>
+        <span class="pizza-summary__value">{{ selectedDough.name }}</span>
+      </div>
+      
+      <div v-if="selectedSize" class="pizza-summary__item">
+        <span class="pizza-summary__label">Размер:</span>
+        <span class="pizza-summary__value">{{ selectedSize.name }}</span>
+      </div>
+      
+      <div v-if="selectedSauce" class="pizza-summary__item">
+        <span class="pizza-summary__label">Соус:</span>
+        <span class="pizza-summary__value">{{ selectedSauce.name }}</span>
+      </div>
+      
+      <div v-if="visibleIngredients.length > 0" class="pizza-summary__section">
+        <div class="pizza-summary__label pizza-summary__label--section">Ингредиенты:</div>
+        <div 
+          v-for="ingredient in visibleIngredients" 
+          :key="ingredient.id"
+          class="pizza-summary__ingredient"
+        >
+          <span class="pizza-summary__value">{{ ingredient.name }}</span>
+          <span class="pizza-summary__count">x{{ ingredient.count }}</span>
+        </div>
+      </div>
+    </div>
+
     <div class="content__result">
       <p>Итого: {{ totalPrice }} ₽</p>
       <AppButton :disabled="!canOrder" size="large" @click="handleOrder">
@@ -110,7 +141,7 @@ export default {
           const ingredient = this.allIngredients.find(
             (ing) => ing.id == ingredientId,
           );
-          if (ingredient && count > 0) {
+          if (ingredient && count > 0 && count !== null && count !== undefined && !isNaN(count)) {
             ingredients.push({
               ...ingredient,
               count,
@@ -139,7 +170,7 @@ export default {
           const ingredient = this.allIngredients.find(
             (ing) => ing.id == ingredientId,
           );
-          if (ingredient && count > 0) {
+          if (ingredient && count > 0 && count !== null && count !== undefined && !isNaN(count)) {
             basePrice += (ingredient.price || 0) * count;
           }
         },
@@ -216,7 +247,19 @@ export default {
         const currentIngredients = { ...this.selectedIngredients };
         const currentCount = currentIngredients[ingredient.id] || 0;
 
-        currentIngredients[ingredient.id] = Math.min(currentCount + 1, 10);
+        const newCount = Math.min(currentCount + 1, 10);
+        
+        if (newCount > 0) {
+          currentIngredients[ingredient.id] = newCount;
+        } else {
+          delete currentIngredients[ingredient.id];
+        }
+
+        Object.keys(currentIngredients).forEach(key => {
+          if (currentIngredients[key] <= 0) {
+            delete currentIngredients[key];
+          }
+        });
 
         this.emitPizzaChange({ selectedIngredients: currentIngredients });
       }
@@ -266,6 +309,7 @@ $green-600: #38a413;
   width: 373px;
   margin-top: 15px;
   margin-bottom: 15px;
+  position: relative;
 }
 
 .pizza-canvas__name-input {
@@ -493,5 +537,72 @@ $green-600: #38a413;
   &--tomatoes.pizza__filling--third::after {
     background-image: url("@/assets/img/filling-big/tomatoes.svg");
   }
+}
+
+.pizza-summary {
+  width: 100%;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  
+  background: $white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba($black, 0.15);
+  border: 2px solid #f0f0f0;
+}
+
+.pizza-summary__title {
+  margin: 0 0 16px 0;
+  padding-bottom: 12px;
+  border-bottom: 2px solid $green-500;
+  font-size: 18px;
+  font-weight: 700;
+  color: $black;
+  word-wrap: break-word;
+}
+
+.pizza-summary__item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.pizza-summary__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  
+  &--section {
+    margin-top: 12px;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 15px;
+    color: $black;
+  }
+}
+
+.pizza-summary__value {
+  font-size: 14px;
+  font-weight: 400;
+  color: $black;
+  text-align: right;
+}
+
+.pizza-summary__section {
+  margin-top: 12px;
+}
+
+.pizza-summary__ingredient {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0 6px 12px;
+  font-size: 13px;
+}
+
+.pizza-summary__count {
+  font-weight: 600;
+  color: $green-500;
+  margin-left: 8px;
 }
 </style>

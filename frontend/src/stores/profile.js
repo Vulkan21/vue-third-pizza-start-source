@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia'
+import { addressService, ordersService } from '@/services'
+import { useAuthStore } from './auth'
 
 export const useProfileStore = defineStore('profile', {
   state: () => ({
@@ -202,7 +204,6 @@ export const useProfileStore = defineStore('profile', {
         
       } catch (error) {
         this.error = error.message
-        console.error('Ошибка авторизации:', error)
         throw error
       } finally {
         this.isLoading = false
@@ -218,7 +219,7 @@ export const useProfileStore = defineStore('profile', {
         avatar: null
       }
       this.addresses = []
-      this.selectedAddress = null
+      this.selectedAddressId = null
       this.orderHistory = []
       this.isAuthenticated = false
       this.error = null
@@ -234,7 +235,6 @@ export const useProfileStore = defineStore('profile', {
         
       } catch (error) {
         this.error = error.message
-        console.error('Ошибка обновления профиля:', error)
         throw error
       } finally {
         this.isLoading = false
@@ -242,24 +242,26 @@ export const useProfileStore = defineStore('profile', {
     },
 
     async loadAddresses() {
-      if (!this.isAuthenticated) return
+      const authStore = useAuthStore()
+      if (!authStore.isAuthenticated) {
+        this.addresses = []
+        return
+      }
       
       try {
+        const response = await addressService.getAll()
+        this.addresses = response.data.map((address, index) => ({
+          ...address,
+          isPrimary: index === 0,
+          isNew: false,
+        }))
         
-        this.addresses = [
-          {
-            id: 1,
-            street: 'ул. Примерная',
-            building: '123',
-            apartment: '45',
-            floor: '5',
-            comment: 'Код домофона: 1234',
-            isPrimary: true
-          }
-        ]
+        if (this.addresses.length > 0 && !this.selectedAddressId) {
+          this.selectedAddressId = this.addresses[0].id
+        }
         
       } catch (error) {
-        console.error('Ошибка загрузки адресов:', error)
+        this.addresses = []
       }
     },
 
@@ -268,20 +270,12 @@ export const useProfileStore = defineStore('profile', {
       this.error = null
       
       try {
-        
-        const newAddress = {
-          id: Date.now(),
-          ...addressData,
-          isPrimary: this.addresses.length === 0
-        }
-        
-        this.addresses.push(newAddress)
-        
-        return newAddress
+        const response = await addressService.create(addressData)
+        await this.loadAddresses()
+        return response.data
         
       } catch (error) {
-        this.error = error.message
-        console.error('Ошибка добавления адреса:', error)
+        this.error = error.response?.data?.error?.message || error.message
         throw error
       } finally {
         this.isLoading = false
@@ -293,15 +287,11 @@ export const useProfileStore = defineStore('profile', {
       this.error = null
       
       try {
-        
-        const index = this.addresses.findIndex(addr => addr.id === addressId)
-        if (index !== -1) {
-          this.addresses[index] = { ...this.addresses[index], ...addressData }
-        }
+        await addressService.update(addressId, addressData)
+        await this.loadAddresses()
         
       } catch (error) {
         this.error = error.message
-        console.error('Ошибка обновления адреса:', error)
         throw error
       } finally {
         this.isLoading = false
@@ -313,19 +303,16 @@ export const useProfileStore = defineStore('profile', {
       this.error = null
       
       try {
+        await addressService.delete(addressId)
         
-        const index = this.addresses.findIndex(addr => addr.id === addressId)
-        if (index !== -1) {
-          this.addresses.splice(index, 1)
+        if (this.selectedAddressId === addressId) {
+          this.selectedAddressId = null
         }
         
-        if (this.selectedAddress === addressId) {
-          this.selectedAddress = null
-        }
+        await this.loadAddresses()
         
       } catch (error) {
         this.error = error.message
-        console.error('Ошибка удаления адреса:', error)
         throw error
       } finally {
         this.isLoading = false
@@ -337,14 +324,15 @@ export const useProfileStore = defineStore('profile', {
     },
 
     async loadOrderHistory() {
-      if (!this.isAuthenticated) return
+      const authStore = useAuthStore()
+      if (!authStore.isAuthenticated) return
       
       try {
-        
-        this.orderHistory = []
+        const response = await ordersService.getAll()
+        this.orderHistory = response.data
         
       } catch (error) {
-        console.error('Ошибка загрузки истории заказов:', error)
+        this.orderHistory = []
       }
     },
 

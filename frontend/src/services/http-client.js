@@ -41,34 +41,6 @@ class HttpClient {
 
   
   handleError(error) {
-    if (error.response) {
-      const { status, data } = error.response
-      
-      switch (status) {
-        case 400:
-          console.error('Ошибка запроса:', data.message || 'Неверные данные')
-          break
-        case 401:
-          console.error('Ошибка авторизации:', data.message || 'Требуется авторизация')
-          break
-        case 403:
-          console.error('Ошибка доступа:', data.message || 'Доступ запрещен')
-          break
-        case 404:
-          console.error('Ошибка:', data.message || 'Ресурс не найден')
-          break
-        case 500:
-          console.error('Ошибка сервера:', data.message || 'Внутренняя ошибка сервера')
-          break
-        default:
-          console.error('Ошибка:', data.message || 'Произошла ошибка')
-      }
-    } else if (error.request) {
-      console.error('Ошибка сети: Нет ответа от сервера')
-    } else {
-      console.error('Ошибка:', error.message)
-    }
-
     return Promise.reject(error)
   }
 

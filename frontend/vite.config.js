@@ -21,6 +21,10 @@ export default defineConfig({
         target: "http://backend:3000/",
         rewrite: (path) => path.replace(/^\/api/, ""),
       },
+      "/public": {
+        target: "http://backend:3000/",
+        changeOrigin: true,
+      },
     },
   },
 });

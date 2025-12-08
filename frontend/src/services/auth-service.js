@@ -8,6 +8,11 @@ class AuthService {
   }
 
   
+  signup(userData) {
+    return httpClient.post('/signup', userData)
+  }
+
+  
   logout() {
     return httpClient.delete('/logout')
   }

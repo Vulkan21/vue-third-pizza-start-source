@@ -1,14 +1,44 @@
 <template>
   <div class="sign-form">
     <router-link to="/" class="close close--white">
-      <span class="visually-hidden">Закрыть форму авторизации</span>
+      <span class="visually-hidden">Закрыть форму регистрации</span>
     </router-link>
     
     <div class="sign-form__title">
-      <h1 class="title title--small">Авторизуйтесь на сайте</h1>
+      <h1 class="title title--small">Создайте аккаунт</h1>
     </div>
     
     <form @submit.prevent="handleSubmit">
+      <div class="sign-form__input">
+        <label class="input" :class="{ 'input--error': errors.name }">
+          <span>Имя</span>
+          <input 
+            v-model="form.name"
+            type="text" 
+            name="name" 
+            placeholder="Иван Иванов"
+            @blur="validateName"
+            @input="clearNameError"
+          />
+          <span v-if="errors.name" class="input__error">{{ errors.name }}</span>
+        </label>
+      </div>
+
+      <div class="sign-form__input">
+        <label class="input" :class="{ 'input--error': errors.phone }">
+          <span>Телефон</span>
+          <input 
+            v-model="form.phone"
+            type="tel" 
+            name="phone" 
+            placeholder="+7 999 999-99-99"
+            @blur="validatePhone"
+            @input="clearPhoneError"
+          />
+          <span v-if="errors.phone" class="input__error">{{ errors.phone }}</span>
+        </label>
+      </div>
+
       <div class="sign-form__input">
         <label class="input" :class="{ 'input--error': errors.email }">
           <span>E-mail</span>
@@ -38,17 +68,32 @@
           <span v-if="errors.password" class="input__error">{{ errors.password }}</span>
         </label>
       </div>
+
+      <div class="sign-form__input">
+        <label class="input" :class="{ 'input--error': errors.confirmPassword }">
+          <span>Подтвердите пароль</span>
+          <input 
+            v-model="form.confirmPassword"
+            type="password" 
+            name="confirmPassword" 
+            placeholder="***********"
+            @blur="validateConfirmPassword"
+            @input="clearConfirmPasswordError"
+          />
+          <span v-if="errors.confirmPassword" class="input__error">{{ errors.confirmPassword }}</span>
+        </label>
+      </div>
       
       <div v-if="authError" class="sign-form__error">
         {{ authError }}
       </div>
       
       <button type="submit" class="button" :disabled="isLoading || !isFormValid">
-        {{ isLoading ? 'Вход...' : 'Авторизоваться' }}
+        {{ isLoading ? 'Регистрация...' : 'Зарегистрироваться' }}
       </button>
 
       <div class="sign-form__footer">
-        <p>Нет аккаунта? <router-link to="/auth/signup">Зарегистрироваться</router-link></p>
+        <p>Уже есть аккаунт? <router-link to="/auth/login">Войти</router-link></p>
       </div>
     </form>
   </div>
@@ -56,35 +101,76 @@
 
 <script>
 import { reactive, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores'
 
 export default {
-  name: 'LoginView',
+  name: 'SignupView',
   setup() {
     const router = useRouter()
-    const route = useRoute()
-    
     const authStore = useAuthStore()
     
     const form = reactive({
+      name: '',
       email: '',
-      password: ''
+      phone: '',
+      password: '',
+      confirmPassword: ''
     })
     
     const errors = reactive({
+      name: '',
       email: '',
-      password: ''
+      phone: '',
+      password: '',
+      confirmPassword: ''
     })
     
     const isLoading = computed(() => authStore.loading)
     const authError = computed(() => authStore.error)
     const isFormValid = computed(() => {
-      return form.email && 
+      return form.name && 
+             form.email && 
+             form.phone && 
              form.password && 
+             form.confirmPassword &&
+             !errors.name &&
              !errors.email && 
-             !errors.password
+             !errors.phone &&
+             !errors.password &&
+             !errors.confirmPassword
     })
+
+    const validateName = () => {
+      if (!form.name) {
+        errors.name = 'Имя обязательно'
+        return false
+      }
+      
+      if (form.name.length < 2) {
+        errors.name = 'Имя должно содержать минимум 2 символа'
+        return false
+      }
+      
+      errors.name = ''
+      return true
+    }
+
+    const validatePhone = () => {
+      if (!form.phone) {
+        errors.phone = 'Телефон обязателен'
+        return false
+      }
+      
+      const phoneRegex = /^(\+7|8)?[\s\-]?\(?[0-9]{3}\)?[\s\-]?[0-9]{3}[\s\-]?[0-9]{2}[\s\-]?[0-9]{2}$/
+      if (!phoneRegex.test(form.phone)) {
+        errors.phone = 'Введите корректный номер телефона'
+        return false
+      }
+      
+      errors.phone = ''
+      return true
+    }
 
     const validateEmail = () => {
       if (!form.email) {
@@ -117,6 +203,31 @@ export default {
       return true
     }
 
+    const validateConfirmPassword = () => {
+      if (!form.confirmPassword) {
+        errors.confirmPassword = 'Подтвердите пароль'
+        return false
+      }
+      
+      if (form.password !== form.confirmPassword) {
+        errors.confirmPassword = 'Пароли не совпадают'
+        return false
+      }
+      
+      errors.confirmPassword = ''
+      return true
+    }
+
+    const clearNameError = () => {
+      errors.name = ''
+      authStore.clearError()
+    }
+
+    const clearPhoneError = () => {
+      errors.phone = ''
+      authStore.clearError()
+    }
+
     const clearEmailError = () => {
       errors.email = ''
       authStore.clearError()
@@ -127,22 +238,31 @@ export default {
       authStore.clearError()
     }
 
+    const clearConfirmPasswordError = () => {
+      errors.confirmPassword = ''
+      authStore.clearError()
+    }
+
     const handleSubmit = async () => {
+      const isNameValid = validateName()
+      const isPhoneValid = validatePhone()
       const isEmailValid = validateEmail()
       const isPasswordValid = validatePassword()
+      const isConfirmPasswordValid = validateConfirmPassword()
       
-      if (!isEmailValid || !isPasswordValid) {
-          return
-        }
+      if (!isNameValid || !isPhoneValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+        return
+      }
         
       try {
-        await authStore.login({
+        await authStore.signup({
+          name: form.name,
           email: form.email,
+          phone: form.phone,
           password: form.password
         })
         
-        const redirect = route.query.redirect || '/'
-        router.push(redirect)
+        router.push('/')
         
       } catch (error) {
       }
@@ -154,10 +274,16 @@ export default {
       isLoading,
       authError,
       isFormValid,
+      validateName,
+      validatePhone,
       validateEmail,
       validatePassword,
+      validateConfirmPassword,
+      clearNameError,
+      clearPhoneError,
       clearEmailError,
       clearPasswordError,
+      clearConfirmPasswordError,
       handleSubmit
     }
   }
@@ -220,10 +346,10 @@ export default {
 }
 
 .sign-form__input {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   
   &:last-of-type {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
 }
 
@@ -284,3 +410,4 @@ export default {
   }
 }
 </style>
+

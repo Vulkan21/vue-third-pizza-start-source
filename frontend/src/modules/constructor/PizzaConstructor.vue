@@ -60,9 +60,11 @@
     </form>
 
     
-    <div v-if="isDragging" class="drag-notification">
-      <p>💫 Перетащите ингредиент на пиццу для добавления</p>
-    </div>
+    <Transition name="fade">
+      <div v-if="isDragging" class="drag-notification">
+        <p>Перетащите ингредиент на пиццу для добавления</p>
+      </div>
+    </Transition>
   </main>
 </template>
 
@@ -160,7 +162,7 @@ export default {
     },
 
     showOrderSuccess(order) {
-      alert(`🍕 Заказ оформлен!
+      alert(`Заказ оформлен!
       
 Пицца: ${order.name}
 Тесто: ${order.dough}
@@ -173,7 +175,7 @@ export default {
 
     showOrderError() {
       alert(
-        "❌ Заполните все обязательные поля:\n- Название пиццы\n- Тесто\n- Размер\n- Соус",
+        "Заполните все обязательные поля:\n- Название пиццы\n- Тесто\n- Размер\n- Соус",
       );
     }
   },

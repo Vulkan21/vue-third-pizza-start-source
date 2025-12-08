@@ -115,6 +115,15 @@ export const useCartStore = defineStore('cart', {
   },
 
   actions: {
+    getImageUrl(imageName) {
+      if (!imageName) return null
+      try {
+        return new URL(`/src/assets/img/${imageName}.svg`, import.meta.url).href
+      } catch (e) {
+        return null
+      }
+    },
+
     async loadMisc() {
       try {
         const response = await miscService.getAll()
@@ -134,11 +143,12 @@ export const useCartStore = defineStore('cart', {
       } else {
         this.items.push({
           ...item,
-          quantity: 1
+          quantity: item.quantity || 1
         })
       }
       
       this.calculateTotal()
+      this.saveToStorage()
     },
 
     removeItem(itemId) {
@@ -146,6 +156,7 @@ export const useCartStore = defineStore('cart', {
       if (index !== -1) {
         this.items.splice(index, 1)
         this.calculateTotal()
+        this.saveToStorage()
       }
     },
 
@@ -157,6 +168,7 @@ export const useCartStore = defineStore('cart', {
         } else {
           item.quantity = quantity
           this.calculateTotal()
+          this.saveToStorage()
         }
       }
     },
@@ -166,6 +178,7 @@ export const useCartStore = defineStore('cart', {
       if (item) {
         item.quantity += 1
         this.calculateTotal()
+        this.saveToStorage()
       }
     },
 
@@ -175,6 +188,7 @@ export const useCartStore = defineStore('cart', {
         if (item.quantity > 1) {
           item.quantity -= 1
           this.calculateTotal()
+          this.saveToStorage()
         } else {
           this.removeItem(itemId)
         }
@@ -248,12 +262,12 @@ export const useCartStore = defineStore('cart', {
     clearCart() {
       this.items = []
       this.totalPrice = 0
+      this.saveToStorage()
     },
 
     addMiscItem(miscId, quantity = 1) {
       const miscItem = this.misc.find(item => item.id === miscId)
       if (!miscItem) {
-        console.error('Дополнительный товар не найден:', miscId)
         return
       }
 
@@ -273,6 +287,7 @@ export const useCartStore = defineStore('cart', {
     clearMiscItems() {
       this.items = this.items.filter(item => item.type !== 'misc')
       this.calculateTotal()
+      this.saveToStorage()
     },
 
     updateMiscQuantity(itemId, quantity) {
@@ -283,6 +298,7 @@ export const useCartStore = defineStore('cart', {
         } else {
           miscItem.quantity = quantity
           this.calculateTotal()
+          this.saveToStorage()
         }
       }
     },
@@ -330,6 +346,7 @@ export const useCartStore = defineStore('cart', {
     removeAllMiscById(miscId) {
       this.items = this.items.filter(item => !(item.type === 'misc' && item.miscId === miscId))
       this.calculateTotal()
+      this.saveToStorage()
     },
 
     calculateTotal() {
@@ -375,7 +392,6 @@ export const useCartStore = defineStore('cart', {
         }
         localStorage.setItem('pizza-cart', JSON.stringify(cartData))
       } catch (error) {
-        console.error('Ошибка сохранения корзины:', error)
       }
     },
 
@@ -390,7 +406,6 @@ export const useCartStore = defineStore('cart', {
           }
         }
       } catch (error) {
-        console.error('Ошибка загрузки корзины:', error)
       }
     },
 
@@ -400,19 +415,25 @@ export const useCartStore = defineStore('cart', {
           .filter(item => item.type === 'pizza')
           .map(pizza => ({
             name: pizza.name,
-            sizeId: pizza.sizeId,
-            doughId: pizza.doughId,
-            sauceId: pizza.sauceId,
-            ingredients: pizza.ingredients || [],
-            quantity: pizza.quantity
-          })),
+            sizeId: Number(pizza.sizeId) || 0,
+            doughId: Number(pizza.doughId) || 0,
+            sauceId: Number(pizza.sauceId) || 0,
+            ingredients: Array.isArray(pizza.ingredients) ? pizza.ingredients
+              .map(ing => ({
+                ingredientId: Number(ing.ingredientId) || 0,
+                quantity: Number(ing.quantity) || 0
+              }))
+              .filter(ing => ing.ingredientId > 0 && ing.quantity > 0) : [],
+            quantity: Number(pizza.quantity) || 1
+          }))
+          .filter(pizza => pizza.sizeId > 0 && pizza.doughId > 0 && pizza.sauceId > 0),
         misc: this.items
           .filter(item => item.type === 'misc')
           .map(miscItem => ({
-            miscId: miscItem.miscId,
-            quantity: miscItem.quantity
-          })),
-        totalAmount: this.totalAmount
+            miscId: Number(miscItem.miscId) || Number(miscItem.id) || 0,
+            quantity: Number(miscItem.quantity) || 1
+          }))
+          .filter(item => item.miscId > 0)
       }
     }
   }

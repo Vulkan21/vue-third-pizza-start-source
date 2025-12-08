@@ -75,11 +75,17 @@ export default {
     handleIngredientCountChange({ ingredient, count }) {
       const newIngredients = { ...this.selectedIngredients };
 
-      if (count > 0) {
+      if (count > 0 && count !== null && count !== undefined) {
         newIngredients[ingredient.id] = count;
       } else {
         delete newIngredients[ingredient.id];
       }
+
+      Object.keys(newIngredients).forEach(key => {
+        if (newIngredients[key] <= 0 || newIngredients[key] === null || newIngredients[key] === undefined) {
+          delete newIngredients[key];
+        }
+      });
 
       this.$emit("ingredients-changed", newIngredients);
     },
